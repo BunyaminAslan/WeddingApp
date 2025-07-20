@@ -22,37 +22,52 @@ public class CloudinaryService
 
     public async Task<string> UploadImageAsync(IFormFile file)
     {
-        if (file.Length == 0)
-            return null;
-
-        await using var stream = file.OpenReadStream();
-        var uploadParams = new ImageUploadParams
+        try
         {
-            File = new FileDescription(file.FileName, stream),
-            Folder = "wedding/private/images",
-            UseFilename = true,
-            UniqueFilename = true,
-            Overwrite = false,
-            Type = "authenticated" //  Bu satır önemli!
-        };
+            if (file.Length == 0)
+                return null;
 
-        var result = await _cloudinary.UploadAsync(uploadParams);
-        return result.PublicId?.ToString();
+            await using var stream = file.OpenReadStream();
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(file.FileName, stream),
+                Folder = "wedding/private/images",
+                UseFilename = true,
+                UniqueFilename = true,
+                Overwrite = false,
+                Type = "authenticated" //  Bu satır önemli!
+            };
+
+            var result = await _cloudinary.UploadAsync(uploadParams);
+            return result.PublicId?.ToString();
+        }
+        catch (Exception ex)
+        {
+
+            throw new Exception("UploadImageAsync Error : " + ex.Message);
+        }
     }
 
     public string GetAuthenticatedUrl(string publicId, string extension = "jpg")
     {
-        var fullPublicId = $"{publicId}.{extension}";
+        try
+        {
+            var fullPublicId = $"{publicId}.{extension}";
 
-        var url = _cloudinary.Api.UrlImgUp
-            .Type("authenticated")
-            .Secure(true)
-            .Signed(true)
-            .Version(DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
-            //.PublicId(publicId)
-            .BuildUrl($"{publicId}.{extension}");
+            var url = _cloudinary.Api.UrlImgUp
+                .Type("authenticated")
+                .Secure(true)
+                .Signed(true)
+                .Version(DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
+                //.PublicId(publicId)
+                .BuildUrl($"{publicId}.{extension}");
 
-        return url;
+            return url;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(message : "GetAuthenticatedUrl hatası " + ex.Message);
+        }
     }
     /*
      public string GetSignedUrl(string publicId, string extension, int expirationInSeconds = 120)

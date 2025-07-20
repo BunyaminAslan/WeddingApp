@@ -1,0 +1,179 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bünyamin & Dilan - Düğün Anıları</title>
+    <link rel="stylesheet" href="~/css/site.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Arka Plan Slider -->
+@*     <div class="background-slider">
+        <!-- Fotoğraf Slide 1 (Kendi fotoğrafınızla değiştirin) -->
+        <div class="slide active" style="background-image: url('assest/2737AB0C-8A0C-4112-9A6D-28AF92FE69D5.jpg');"></div>
+        <!-- Video Slide (Kendi videonuzla değiştirin) -->
+        <div class="slide">
+            <video class="background-video" autoplay muted loop playsinline>
+                <source src="assest/IMG_7542.MP4" type="video/mp4">
+                Tarayıcınız video etiketini desteklemiyor.
+            </video>
+        </div>
+        <!-- Fotoğraf Slide 2 (Kendi fotoğrafınızla değiştirin) -->
+        <div class="slide" style="background-image: url('assest/IMG_1734.jpg');"></div>
+    </div> *@
+
+    <!-- Ana Başlık İçeriği -->
+    <div class="hero-content">
+        <h1>Slider Image</h1>
+    </div>
+
+    <main class="container" style="text-align: center;">
+        <section id="upload-section">
+            <form id="upload-form">
+                <label for="file-input" class="custom-file-upload">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Fotoğraf Seç
+                </label>
+                <input id="file-input" type="file" multiple accept="image/*">
+
+                <div id="preview-area"></div>
+
+                <button type="submit" id="upload-button" disabled>Seçilenleri Yükle</button>
+            </form>
+        </section>
+
+        <section id="gallery-section">
+            <h2>Yüklenen Fotoğraflar</h2>
+            <div id="photo-gallery" class="gallery-grid">
+                <!-- Yüklenen fotoğraflar buraya eklenecek -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <p>En güzel anılar birlikte birikir.</p>
+    </footer>
+
+    <script src="~/js/site.js"></script>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const uploadButton = document.getElementById('upload-button');
+        const previewArea = document.getElementById('preview-area');
+        const photoGallery = document.getElementById('photo-gallery');
+        let selectedFiles = [];
+
+        // Dosya seçildiğinde önizleme ve buton aktifleşir
+        fileInput.addEventListener('change', (event) => {
+            previewArea.innerHTML = '';
+            selectedFiles = Array.from(event.target.files);
+
+            if (selectedFiles.length > 0) {
+                uploadButton.disabled = false;
+                uploadButton.textContent = `${selectedFiles.length} Fotoğrafı Yükle`;
+
+                selectedFiles.forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+
+                        reader.onload = (e) => {
+                            const previewContainer = document.createElement('div');
+                            previewContainer.classList.add('preview-image-container');
+
+                            const img = document.createElement('img');
+                            img.classList.add('preview-image');
+                            img.src = e.target.result;
+
+                            previewContainer.appendChild(img);
+                            previewArea.appendChild(previewContainer);
+                        };
+
+                        reader.readAsDataURL(file);
+                    }
+                });
+            } else {
+                uploadButton.disabled = true;
+                uploadButton.textContent = 'Seçilenleri Yükle';
+            }
+        });
+
+        // Galeriyi backend'den günceller
+        function refreshGallery() {
+            fetch('/api/upload/slider/photos')
+                .then(res => res.json())
+                .then(images => {
+                    photoGallery.innerHTML = '';
+                    images.forEach(photo => {
+                        const img = document.createElement('img');
+                        img.classList.add('gallery-item');
+                        img.src = photo.url; // signed URL backend'den gelir
+                        photoGallery.appendChild(img);
+                    });
+                })
+                .catch(err => {
+                    console.error("Galeri yüklenemedi", err);
+                });
+        }
+
+        // Yükleme butonuna basıldığında seçilen tüm dosyaları gönder
+        document.getElementById("upload-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            if (selectedFiles.length === 0) {
+                alert("Lütfen önce fotoğraf seçin.");
+                return;
+            }
+
+            uploadButton.disabled = true;
+            uploadButton.textContent = "Yükleniyor...";
+
+            const uploadPromises = selectedFiles.map(file => {
+                const formData = new FormData();
+                formData.append("file", file);
+
+                return fetch("/api/upload/slider/image", {
+                    method: "POST",
+                    body: formData
+                }).then(res => {
+                    if (!res.ok) throw new Error("Upload failed");
+                    return res.json();
+                });
+            });
+
+            try {
+                await Promise.all(uploadPromises);
+                alert("Fotoğraflar başarıyla yüklendi!");
+            } catch (err) {
+                console.error(err);
+                alert("Bir hata oluştu, lütfen tekrar deneyin.");
+            } finally {
+                selectedFiles = [];
+                previewArea.innerHTML = '';
+                uploadButton.disabled = true;
+                uploadButton.textContent = 'Seçilenleri Yükle';
+                fileInput.value = '';
+
+                refreshGallery();
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', refreshGallery);
+
+        images.forEach(photo => {
+            if (photo.url) {
+                const img = document.createElement('img');
+                img.classList.add('gallery-item');
+                img.src = photo.url;
+                photoGallery.appendChild(img);
+            }
+        });
+    </script>
+</body>
+</html>

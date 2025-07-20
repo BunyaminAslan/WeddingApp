@@ -1,0 +1,62 @@
+using Microsoft.EntityFrameworkCore;
+using System;
+using Wedding.Repository;
+using Wedding.Repository.Interfaces;
+using Wedding.Repository.Services;
+using WeddingApp.UI.ImageUpload;
+
+
+var builder = WebApplication.CreateBuilder(args);
+
+DotNetEnv.Env.Load();
+
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("CloudinarySettings"));
+
+//builder.Services.Configure<CloudinarySettings>(options =>
+//{
+//    options.CloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME");
+//    options.ApiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY");
+//    options.ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET");
+//});
+
+
+builder.Configuration["ConnectionStrings:DefaultConnection"] = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
+
+builder.Services.AddDbContext<Supabase_WeddingDbContext>(options =>
+    options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]));
+
+//builder.Services.AddDbContext<Supabase_WeddingDbContext>(options =>
+//    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
+
+builder.Services.AddSingleton<CloudinaryService>();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();

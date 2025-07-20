@@ -1,0 +1,315 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bünyamin & Dilan - Düğün Anıları</title>
+    <link rel="stylesheet" href="~/css/site.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+</head>
+<body>
+
+    <!-- Loading Overlay -->
+    <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+        <div class="relative w-24 h-24">
+            <div class="absolute inset-0 animate-spin">
+                <svg class="w-full h-full text-pink-500" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <svg class="w-8 h-8 text-rose-500 animate__animated animate__heartBeat animate__infinite" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                          d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                          clip-rule="evenodd" />
+                </svg>
+            </div>
+        </div>
+        <p class="mt-4 text-xl text-white animate__animated animate__fadeInUp animate__infinite">...</p>
+    </div>
+
+
+    <!-- Alert Wrapper -->
+    <div id="info-alert" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-80 animate__animated animate__fadeInDown">
+            <div class="flex items-center space-x-3">
+                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-800">Bilgilendirme</h3>
+            </div>
+            <p class="mt-3 text-gray-600 text-sm">Fotoğraflar başarıyla yüklendi!</p>
+        </div>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="error-alert" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-80 animate__animated animate__shakeX">
+            <div class="flex items-center space-x-3">
+                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M18.364 5.636l-1.414-1.414L12 9.172 7.05 4.222 5.636 5.636 10.586 10.586 5.636 15.536l1.414 1.414L12 12.828l4.95 4.95 1.414-1.414L13.414 10.586z" />
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-800">Hata</h3>
+            </div>
+            <p class="mt-3 text-gray-600 text-sm">Bir şeyler ters gitti. Lütfen tekrar deneyin.</p>
+        </div>
+    </div>
+
+
+    <!-- Arka Plan Slider -->
+    <div class="background-slider">
+        <!-- Fotoğraf Slide 1 (Kendi fotoğrafınızla değiştirin) -->
+        <div class="slide active" style="background-image: url('assest/IMG_2234.jpg');"></div>
+        <!-- Video Slide (Kendi videonuzla değiştirin) -->
+        <div class="slide">
+            <video class="background-video" autoplay muted loop playsinline>
+                <source src="assest/IMG_7542.MP4" type="video/mp4">
+                Tarayıcınız video etiketini desteklemiyor.
+            </video>
+            </video>
+        </div>
+        <!-- Fotoğraf Slide 2 (Kendi fotoğrafınızla değiştirin) -->
+        <div class="slide" style="background-image: url('assest/IMG_2235.jpg');"></div>
+        <div class="slide" style="background-image: url('assest/IMG_2236.jpg');"></div>
+    </div>
+
+
+    <!-- Ana Başlık İçeriği -->
+    <div class="hero-content">
+        <h1>Dilan & Bünyamin</h1>
+        <p>Bu mutlu günümüzü bizimle paylaştığınız için teşekkür ederiz</p>
+    </div>
+
+    <main class="container" style="text-align: center;">
+        <section id="upload-section">
+            <h2>Anılarınızı Bizimle Paylaşın</h2>
+            <p>Düğün sırasında çektiğiniz en güzel fotoğrafları buraya yükleyebilirsiniz.</p>
+
+            <form id="upload-form">
+                <label for="file-input" class="custom-file-upload">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Fotoğraf Seç
+                </label>
+                <input id="file-input" type="file" multiple accept="image/*">
+
+                <div id="preview-area"></div>
+
+                <button type="submit" id="upload-button" disabled>Seçilenleri Yükle</button>
+            </form>
+        </section>
+
+        <section id="gallery-section">
+            <h2>Yüklenen Fotoğraflar</h2>
+            <div id="photo-gallery" class="gallery-grid">
+                <!-- Yüklenen fotoğraflar buraya eklenecek -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <p>En güzel anılar birlikte birikir.</p>
+    </footer>
+
+    <script src="~/js/site.js"></script>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const uploadButton = document.getElementById('upload-button');
+        const previewArea = document.getElementById('preview-area');
+        const photoGallery = document.getElementById('photo-gallery');
+        let selectedFiles = [];
+
+        // Dosya seçildiğinde önizleme ve buton aktifleşir
+        fileInput.addEventListener('change', (event) => {
+            previewArea.innerHTML = '';
+            selectedFiles = Array.from(event.target.files);
+
+            if (selectedFiles.length > 0) {
+                uploadButton.disabled = false;
+                uploadButton.textContent = `${selectedFiles.length} Fotoğrafı Yükle`;
+
+                selectedFiles.forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+
+                        reader.onload = (e) => {
+                            const previewContainer = document.createElement('div');
+                            previewContainer.classList.add('preview-image-container');
+
+                            const img = document.createElement('img');
+                            img.classList.add('preview-image');
+                            img.src = e.target.result;
+
+                            previewContainer.appendChild(img);
+                            previewArea.appendChild(previewContainer);
+                        };
+
+                        reader.readAsDataURL(file);
+                    }
+                });
+            } else {
+                uploadButton.disabled = true;
+                uploadButton.textContent = 'Seçilenleri Yükle';
+            }
+        });
+
+        function triggerDownload(url, filename = 'download.jpg') {
+            fetch(url)
+                .then(res => res.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                });
+        }
+
+
+        // Galeriyi backend'den günceller
+        function refreshGallery() {
+            fetch('/api/upload/photos')
+                .then(res => res.json())
+                .then(images => {
+                    photoGallery.innerHTML = '';
+                    images.forEach(photo => {
+                        const container = document.createElement('div');
+                        container.classList.add('photo-wrapper');
+
+                        const img = document.createElement('img');
+                        img.classList.add('gallery-item');
+                        img.src = photo.url;
+
+                        const downloadBtn = document.createElement('button');
+                        downloadBtn.classList.add('download-icon');
+                        downloadBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24">
+                            <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v2h16v-2z"/>
+                        </svg>
+                    `;
+
+                        downloadBtn.addEventListener('click', () => {
+                            const fileName = photo.url.split('/').pop().split('?')[0]; // filename from URL
+                            triggerDownload(photo.url, fileName);
+                        });
+
+                        container.appendChild(img);
+                        container.appendChild(downloadBtn);
+                        photoGallery.appendChild(container);
+                    });
+
+                })
+                .catch(err => {
+                    console.error("Galeri yüklenemedi", err);
+                });
+        }
+
+        // Yükleme butonuna basıldığında seçilen tüm dosyaları gönder
+        document.getElementById("upload-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            if (selectedFiles.length === 0) {
+                alert("Lütfen önce fotoğraf seçin.");
+                return;
+            }
+
+            // SHOW LOADER
+            document.getElementById("loader").classList.remove("hidden");
+
+            uploadButton.disabled = true;
+            uploadButton.textContent = "Yükleniyor...";
+
+            const uploadPromises = selectedFiles.map(file => {
+                const formData = new FormData();
+                formData.append("file", file);
+
+                return fetch("/api/upload/image", {
+                    method: "POST",
+                    body: formData
+                }).then(res => {
+                    if (!res.ok) throw new Error("Upload failed");
+                    return res.json();
+                });
+            });
+
+            try {
+                await Promise.all(uploadPromises);
+                showInfoAlert("Fotoğraflar başarıyla yüklendi!");
+            } catch (err) {
+                console.error(err);
+                showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin.");
+            } finally {
+                selectedFiles = [];
+                previewArea.innerHTML = '';
+                uploadButton.disabled = true;
+                uploadButton.textContent = 'Seçilenleri Yükle';
+                fileInput.value = '';
+
+                refreshGallery();
+
+                // HIDE LOADER
+                document.getElementById("loader").classList.add("hidden");
+            }
+        });
+
+
+        window.addEventListener('DOMContentLoaded', refreshGallery);
+
+        window.addEventListener("load", () => {
+            const loader = document.getElementById("loader");
+            if (loader) {
+                loader.classList.add("animate__fadeOut");
+                setTimeout(() => document.getElementById("loader").classList.add("hidden"), 1000);
+            }
+        });
+
+        function showInfoAlert(message) {
+            const alertBox = document.getElementById("info-alert");
+            alertBox.querySelector("p").textContent = message;
+            alertBox.classList.remove("hidden");
+
+            setTimeout(() => {
+                alertBox.classList.add("animate__fadeOutUp");
+                setTimeout(() => {
+                    alertBox.classList.add("hidden");
+                    alertBox.classList.remove("animate__fadeOutUp");
+                }, 500);
+            }, 2500);
+        }
+
+        function showErrorAlert(message) {
+            const alertBox = document.getElementById("error-alert");
+            alertBox.querySelector("p").textContent = message;
+            alertBox.classList.remove("hidden");
+
+            setTimeout(() => {
+                alertBox.classList.add("animate__fadeOutUp");
+                setTimeout(() => {
+                    alertBox.classList.add("hidden");
+                    alertBox.classList.remove("animate__fadeOutUp");
+                }, 500);
+            }, 3000);
+        }
+
+    </script>
+</body>
+</html>

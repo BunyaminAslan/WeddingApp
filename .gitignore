@@ -1,0 +1,47 @@
+# .NET Core
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Rider
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Build outputs
+out/
+publish/
+dist/
+
+# OS crap
+.DS_Store
+Thumbs.db
+
+# Secrets / Config
+.env
+appsettings.Development.json
+secrets.json
+
+# Node.js (varsa frontend falan varsa diye)
+node_modules/
+npm-debug.log*
+
+# Visual Studio Code
+.vscode/
+
+# Optional: Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Optional: Test results
+TestResults/
+
+# Optional: NuGet packages
+*.nupkg
+packages/

@@ -1,0 +1,328 @@
+﻿/* Google Fonts'tan daha şık bir font ailesi */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@300;400&family=Great+Vibes&display=swap');
+
+/* Değişkenler */
+:root {
+    --primary-green: #00dd9b; /* ON Bankacılık'tan ilham alan canlı yeşil */
+    --dark-green: #00b880; /* Vurgu için daha koyu yeşil */
+    --dark-text: #2c3e50; /* Daha yumuşak bir siyah */
+    --light-text: #ffffff;
+    --background-color: #fdfdfd;
+    --card-background: rgba(255, 255, 255, 0.92); /* Hafif şeffaf kart */
+    --shadow: 0 12px 35px rgba(44, 62, 80, 0.08); /* Daha belirgin gölge */
+    --border-radius: 16px; /* Daha yumuşak kenarlar */
+    --font-heading: 'Great Vibes', cursive; /* Davetiye için el yazısı fontu */
+    --font-body: 'Lato', sans-serif;
+}
+
+/* Genel Sıfırlama ve Ayarlar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    /* ARKA PLAN FOTOĞRAFI: Buradaki url'yi kendi fotoğrafınızın linki ile değiştirebilirsiniz. */
+    font-family: var(--font-body);
+    color: var(--dark-text);
+    line-height: 1.6;
+    position: relative;
+}
+
+    /* Okunabilirliği artırmak için arka plan üzerine karartma katmanı */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4); /* Karartmayı biraz artırdım */
+        z-index: 0;
+    }
+
+/* Arka Plan Slider */
+.background-slider {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: -1; /* Karartma katmanının arkasında kalması için */
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+}
+
+    .slide.active {
+        opacity: 1;
+    }
+
+.background-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.container {
+    width: 100%; /* TAM genişlik */
+    max-width: none; /* Sınırlamayı kaldır */
+    margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    padding: 2.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+
+
+/* Ana Başlık İçeriği */
+.hero-content {
+    color: var(--light-text);
+    text-align: center;
+    /*min-height: 70vh; /* İçeriği aşağı itmek için */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+    .hero-content h1 {
+        font-family: var(--font-heading);
+        font-size: 7rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 3px 3px 8px rgba(0,0,0,0.5);
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .hero-content p {
+        font-size: 1.1rem;
+        font-weight: 300;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        animation: fadeInUp 1s 0.2s ease-out backwards;
+    }
+
+.container h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--dark-text);
+}
+
+.container #upload-section > p {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Dosya Yükleme Alanı */
+#upload-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Gizli dosya inputu */
+#file-input {
+    display: none;
+}
+
+/* Özel dosya seçme butonu */
+.custom-file-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--dark-text);
+    color: var(--light-text);
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .custom-file-upload:hover {
+        background-color: #333;
+        transform: translateY(-2px);
+    }
+
+/* Yükle Butonu */
+#upload-button {
+    background-color: var(--primary-green);
+    color: var(--light-text);
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    #upload-button:hover:not(:disabled) {
+        background-color: var(--dark-green);
+        box-shadow: 0 8px 20px rgba(0, 221, 155, 0.4);
+        transform: translateY(-3px);
+    }
+
+    #upload-button:disabled {
+        background-color: #e9ecef;
+        color: #adb5bd;
+        cursor: not-allowed;
+    }
+
+/* Fotoğraf Önizleme Alanı */
+#preview-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.preview-image-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    border: 3px solid #f0f0f0;
+}
+
+/* Galeri Bölümü */
+#gallery-section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.gallery-item {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInGridItem 0.5s ease-out forwards;
+}
+
+    .gallery-item:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+/* Alt Bilgi (Footer) */
+.main-footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--light-text);
+    font-size: 0.9rem;
+}
+
+/* Animasyonlar */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInGridItem {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.photo-wrapper {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+    .photo-wrapper .gallery-item {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+    }
+
+.download-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+    .download-icon:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .download-icon svg {
+        width: 20px;
+        height: 20px;
+        fill: white;
+    }
+

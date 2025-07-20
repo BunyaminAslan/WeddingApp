@@ -1,13 +1,17 @@
 services:
   - type: web
     name: weddingapp
-    env: dotnet
-    buildCommand: dotnet publish -c Release -o out
-    startCommand: dotnet out/WeddingApp.dll
+    runtime: docker
+    repo: https://github.com/BunyaminAslan/WeddingApp
+    plan: free
+    region: frankfurt
+    dockerfilePath: Dockerfile
     envVars:
-      - key: CLOUDINARY__CLOUDNAME
-        fromEnvVar: CLOUDINARY__CLOUDNAME
-      - key: CLOUDINARY__APIKEY
-        fromEnvVar: CLOUDINARY__APIKEY
-      - key: CLOUDINARY__APISECRET
-        fromEnvVar: CLOUDINARY__APISECRET
+      - key: CLOUDINARY_CLOUDNAME
+        value: your_cloud_name
+      - key: CLOUDINARY_APIKEY
+        value: your_api_key
+      - key: CLOUDINARY_APISECRET
+        value: your_api_secret
+      - key: DB_CONNECTION_STRING
+        value: your_connection_string

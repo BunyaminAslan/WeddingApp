@@ -5,13 +5,13 @@ services:
     repo: https://github.com/BunyaminAslan/WeddingApp
     plan: free
     region: frankfurt
-    dockerfilePath: Dockerfile
+    dockerfilePath: dockerfile
     envVars:
       - key: CLOUDINARY_CLOUDNAME
-        value: your_cloud_name
+        value: dmwlmdigc
       - key: CLOUDINARY_APIKEY
-        value: your_api_key
+        value: 659553876844838
       - key: CLOUDINARY_APISECRET
-        value: your_api_secret
+        value: nvk-_C8ui0ohvLuaxo3bkW2FGYU
       - key: DB_CONNECTION_STRING
-        value: your_connection_string
+        value: User Id=postgres.ngfgtlfzrajjwrffhnlp;Password=f-9dmhyBK*;Server=aws-0-eu-north-1.pooler.supabase.com;Port=5432;Database=postgres

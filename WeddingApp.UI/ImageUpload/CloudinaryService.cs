@@ -15,6 +15,11 @@ public class CloudinaryService
             Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET")
         );
 
+        Console.WriteLine(account.Cloud);
+        Console.WriteLine(account.ApiSecret);
+        Console.WriteLine(account.ApiKey);
+
+
         _cloudinary = new Cloudinary(account);
     }
 

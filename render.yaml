@@ -7,11 +7,11 @@ services:
     region: frankfurt
     dockerfilePath: dockerfile
     envVars:
-      - key: CLOUDINARY_CLOUDNAME
+      - key: CLOUDINARY_CLOUD_NAME
         value: dmwlmdigc
-      - key: CLOUDINARY_APIKEY
+      - key: CLOUDINARY_API_KEY
         value: 659553876844838
-      - key: CLOUDINARY_APISECRET
+      - key: CLOUDINARY_API_SECRET
         value: nvk-_C8ui0ohvLuaxo3bkW2FGYU
       - key: DB_CONNECTION_STRING
         value: User Id=postgres.ngfgtlfzrajjwrffhnlp;Password=f-9dmhyBK*;Server=aws-0-eu-north-1.pooler.supabase.com;Port=5432;Database=postgres;Pooling=false

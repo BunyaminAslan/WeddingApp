@@ -1,13 +1,13 @@
 services:
   - type: web
-    name: wedding-gallery
+    name: weddingapp
     env: dotnet
     buildCommand: dotnet publish -c Release -o out
-    startCommand: dotnet out/YourProjectName.dll
+    startCommand: dotnet out/WeddingApp.dll
     envVars:
       - key: CLOUDINARY__CLOUDNAME
-        sync: false
+        fromEnvVar: CLOUDINARY__CLOUDNAME
       - key: CLOUDINARY__APIKEY
-        sync: false
+        fromEnvVar: CLOUDINARY__APIKEY
       - key: CLOUDINARY__APISECRET
-        sync: false
+        fromEnvVar: CLOUDINARY__APISECRET

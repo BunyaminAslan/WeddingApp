@@ -14,10 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\assest\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Wedding.Repository\Wedding.Repository.csproj" />
   </ItemGroup>
 

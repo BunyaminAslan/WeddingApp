@@ -10,8 +10,8 @@ namespace Wedding.Model.DB
     {
         public int id { get; set; }
         public string PublicId { get; set; }
-        public string? Ip { get; set; }
-        public string? Device { get; set; }
+        public string? Ip { get; set; } = null;
+        public string? Device { get; set; } = null;
         public string Extension { get; set; } = "jpg"; // varsayılan
         public DateTime created_at { get; set; } = DateTime.UtcNow;
         public bool IsActive {  get; set; } = true;

@@ -27,7 +27,13 @@ namespace WeddingApp.UI.Controllers
             if (extension == "heic")
                 extension = "jpg";
 
-            await _photoService.AddAsync(new Wedding.Model.DB.PhotoDb { PublicId = imageUrl, Extension = extension });
+            var ipAddress = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+              ?? HttpContext.Connection.RemoteIpAddress?.ToString();
+
+            var userAgent = Request.Headers["User-Agent"].ToString();
+
+
+            await _photoService.AddAsync(new Wedding.Model.DB.PhotoDb { PublicId = imageUrl, Extension = extension, Ip = ipAddress, Device = userAgent });
 
             await _photoService.SaveAsync();
 

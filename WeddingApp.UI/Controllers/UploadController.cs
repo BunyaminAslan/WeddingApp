@@ -23,7 +23,11 @@ namespace WeddingApp.UI.Controllers
             if (imageUrl == null)
                 return BadRequest("Yükleme başarısız.");
 
-            _photoService.Add(new Wedding.Model.DB.PhotoDb { PublicId = imageUrl, Extension = file.FileName.Split('.')[1] == "HEIC" ? "jpg" : file.FileName.Split('.')[1] });
+            var extension = Path.GetExtension(file.FileName)?.TrimStart('.').ToLowerInvariant() ?? "jpg";
+            if (extension == "heic")
+                extension = "jpg";
+
+            await _photoService.AddAsync(new Wedding.Model.DB.PhotoDb { PublicId = imageUrl, Extension = extension });
 
             await _photoService.SaveAsync();
 
@@ -35,18 +39,19 @@ namespace WeddingApp.UI.Controllers
         {
             try
             {
-                var photos = (await _photoService.GetAllAsync())
+                /*var photos = (await _photoService.GetAllAsync())
                     .OrderByDescending(p => p.created_at)
                     .Select(p => new {
                         url = cloudinaryService.GetAuthenticatedUrl(p.PublicId, p.Extension)
                     })
                     .ToList();
-
+                
                 return Ok(photos);
+                */
+                return Ok(new CloudinaryService());
             }
             catch (Exception ex)
             {
-                // Logla (dilersen burada log servisi varsa kullan)
                 return BadRequest(new
                 {
                     message = "Galeri listelenirken bir hata oluştu",

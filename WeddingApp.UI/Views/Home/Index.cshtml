@@ -19,6 +19,61 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
     <link rel="icon" type="image/png" href="~/assest/favicon.png" />
+    <style>
+        .countdown-container {
+            text-align: center;
+            /* color: #fff; */
+            padding: 20px;
+            /* backdrop-filter: blur(10px); */
+            /* border-radius: 20px; */
+            /* background: rgba(0, 0, 0, 0.4); */
+            /* box-shadow: 0 0 30px rgba(0, 0, 0, 0.3); */
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 600px;
+            margin: auto;
+        }
+
+            .countdown-container h2 {
+                font-size: 28px;
+                margin-bottom: 20px;
+                color: #fff;
+                text-shadow: 0 0 5px #00f0ff;
+            }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+            .countdown div {
+                background: linear-gradient(145deg, #0f2027, #203a43, #2c5364);
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0, 255, 255, 0.3);
+                min-width: 80px;
+                transition: transform 0.2s ease;
+            }
+
+                .countdown div:hover {
+                    transform: scale(1.05);
+                }
+
+            .countdown span {
+                font-size: 32px;
+                font-weight: bold;
+                display: block;
+                color: #00f0ff;
+                text-shadow: 0 0 10px #00f0ff;
+            }
+
+            .countdown label {
+                font-size: 14px;
+                color: #ccc;
+                margin-top: 5px;
+                display: block;
+            }
+    </style>
 
 </head>
 <body>
@@ -56,7 +111,7 @@
                 </svg>
                 <h3 class="text-lg font-semibold text-gray-800">Bilgilendirme</h3>
             </div>
-            <p class="mt-3 text-gray-600 text-sm">Fotoğraflar başarıyla yüklendi!</p>
+            <p class="mt-3 text-gray-600 text-sm">Fotograflar basarıyla yüklendi!</p>
         </div>
     </div>
 
@@ -71,57 +126,67 @@
                 </svg>
                 <h3 class="text-lg font-semibold text-gray-800">Hata</h3>
             </div>
-            <p class="mt-3 text-gray-600 text-sm">Bir şeyler ters gitti. Lütfen tekrar deneyin.</p>
+            <p class="mt-3 text-gray-600 text-sm">Bir seyler ters gitti. Lütfen tekrar deneyin.</p>
         </div>
     </div>
 
 
     <!-- Arka Plan Slider -->
     <div class="background-slider">
-        <!-- Fotoğraf Slide 1 (Kendi fotoğrafınızla değiştirin) -->
-        <div class="slide active" style="background-image: url('assest/IMG_2234.jpg');"></div>
-        <!-- Video Slide (Kendi videonuzla değiştirin) -->
+        <!-- Fotograf Slide 1 (Kendi fotografınızla degistirin) -->
+        <div class="slide active" style="background-image: url('assest/Biz.jpg');"></div>
+
+        <!-- Fotograf Slide 2 (Kendi fotografınızla degistirin) -->
+        <div class="slide" style="background-image: url('assest/Biz2.jpg');"></div>
+        <div class="slide" style="background-image: url('assest/Analar.jpg');"></div>
+        <div class="slide" style="background-image: url('assest/Jehat.jpg');"></div>
+        <!-- Video Slide (Kendi videonuzla degistirin) -->
         <div class="slide">
             <video class="background-video" autoplay muted loop playsinline>
                 <source src="assest/IMG_7542.MP4" type="video/mp4">
                 Tarayıcınız video etiketini desteklemiyor.
             </video>
-            </video>
         </div>
-        <!-- Fotoğraf Slide 2 (Kendi fotoğrafınızla değiştirin) -->
-        <div class="slide" style="background-image: url('assest/IMG_2235.jpg');"></div>
-        <div class="slide" style="background-image: url('assest/IMG_2236.jpg');"></div>
+
     </div>
 
 
-    <!-- Ana Başlık İçeriği -->
+    <!-- Ana Baslık İcerigi -->
     <div class="hero-content">
         <h1>Dilan & Bünyamin</h1>
-        <p>Bu mutlu günümüzü bizimle paylaştığınız için teşekkür ederiz</p>
+        <p>Bu mutlu günümüzü bizimle paylastıgınız icin tesekkür ederiz</p>
     </div>
 
     <main class="container" style="text-align: center;">
         <section id="upload-section">
-            <h2>Anılarınızı Bizimle Paylaşın</h2>
-            <p>Düğün sırasında çektiğiniz en güzel fotoğrafları buraya yükleyebilirsiniz.</p>
+            <h2>Anılarınızı Bizimle Paylasın</h2>
+            <p>Dügün sırasında cektiginiz en güzel fotografları buraya yükleyebilirsiniz.</p>
 
             <form id="upload-form">
                 <label for="file-input" class="custom-file-upload">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                    Fotoğraf Seç
+                    Fotograf Sec
                 </label>
                 <input id="file-input" type="file" multiple accept="image/*">
 
                 <div id="preview-area"></div>
 
-                <button type="submit" id="upload-button" disabled>Seçilenleri Yükle</button>
+                <button type="submit" id="upload-button" disabled>Secilenleri Yükle</button>
             </form>
         </section>
 
         <section id="gallery-section">
-            <h2>Yüklenen Fotoğraflar</h2>
-            <div id="photo-gallery" class="gallery-grid">
-                <!-- Yüklenen fotoğraflar buraya eklenecek -->
+            <h2>Yüklenen Fotograflar</h2>
+            <h3 class="overtime">2025.09.06 - 00:30 da yüklenen tüm fotografları burada görebileceksiniz.</h3>
+            <div class="countdown-container">
+                <div class="countdown">
+                    <div><span id="days">00</span><label>Gün</label></div>
+                    <div><span id="hours">00</span><label>Saat</label></div>
+                    <div><span id="minutes">00</span><label>Dakika</label></div>
+                    <div><span id="seconds">00</span><label>Saniye</label></div>
+                </div>
+            </div>            <div id="photo-gallery" class="gallery-grid">
+                <!-- Yüklenen fotograflar buraya eklenecek -->
             </div>
         </section>
     </main>
@@ -139,14 +204,44 @@
         const photoGallery = document.getElementById('photo-gallery');
         let selectedFiles = [];
 
-        // Dosya seçildiğinde önizleme ve buton aktifleşir
+        // Hedef tarih (Yıl, Ay-1, Gün, Saat, Dakika)
+        const targetDate = new Date(2025, 8, 6, 0, 30, 0); // 8 = Eylül (0-indexli)
+
+        function updateCountdown() {
+            const now = new Date();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                document.querySelector('.countdown-container').innerHTML = `
+                        <h2>Zamanı Geldi :) </h2>`;
+                document.querySelector('.overtime').innerHTML = '';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            document.getElementById("days").innerText = String(days).padStart(2, '0');
+            document.getElementById("hours").innerText = String(hours).padStart(2, '0');
+            document.getElementById("minutes").innerText = String(minutes).padStart(2, '0');
+            document.getElementById("seconds").innerText = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        //-------------------------------
+
+        // Dosya secildiginde önizleme ve buton aktiflesir
         fileInput.addEventListener('change', (event) => {
             previewArea.innerHTML = '';
             selectedFiles = Array.from(event.target.files);
 
             if (selectedFiles.length > 0) {
                 uploadButton.disabled = false;
-                uploadButton.textContent = `${selectedFiles.length} Fotoğrafı Yükle`;
+                uploadButton.textContent = `${selectedFiles.length} Fotografı Yükle`;
 
                 selectedFiles.forEach(file => {
                     if (file.type.startsWith('image/')) {
@@ -169,7 +264,7 @@
                 });
             } else {
                 uploadButton.disabled = true;
-                uploadButton.textContent = 'Seçilenleri Yükle';
+                uploadButton.textContent = 'Secilenleri Yükle';
             }
         });
 
@@ -193,44 +288,47 @@
                 .then(res => res.json())
                 .then(images => {
                     photoGallery.innerHTML = '';
-                    images.forEach(photo => {
-                        const container = document.createElement('div');
-                        container.classList.add('photo-wrapper');
 
-                        const img = document.createElement('img');
-                        img.classList.add('gallery-item');
-                        img.src = photo.url;
+                    if (images.length > 0) {
 
-                        const downloadBtn = document.createElement('button');
-                        downloadBtn.classList.add('download-icon');
-                        downloadBtn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24">
-                            <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v2h16v-2z"/>
-                        </svg>
-                    `;
+                        images.forEach(photo => {
+                            const container = document.createElement('div');
+                            container.classList.add('photo-wrapper');
 
-                        downloadBtn.addEventListener('click', () => {
-                            const fileName = photo.url.split('/').pop().split('?')[0]; // filename from URL
-                            triggerDownload(photo.url, fileName);
+                            const img = document.createElement('img');
+                            img.classList.add('gallery-item');
+                            img.src = photo.url;
+
+                            const downloadBtn = document.createElement('button');
+                            downloadBtn.classList.add('download-icon');
+                            downloadBtn.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24">
+                                    <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v2h16v-2z"/>
+                                </svg>
+                            `;
+
+                            downloadBtn.addEventListener('click', () => {
+                                const fileName = photo.url.split('/').pop().split('?')[0]; // filename from URL
+                                triggerDownload(photo.url, fileName);
+                            });
+
+                            container.appendChild(img);
+                            container.appendChild(downloadBtn);
+                            photoGallery.appendChild(container);
                         });
-
-                        container.appendChild(img);
-                        container.appendChild(downloadBtn);
-                        photoGallery.appendChild(container);
-                    });
-
+                    };
                 })
                 .catch(err => {
                     console.error("Galeri yüklenemedi", err);
                 });
         }
 
-        // Yükleme butonuna basıldığında seçilen tüm dosyaları gönder
+        // Yükleme butonuna basıldıgında secilen tüm dosyaları gönder
         document.getElementById("upload-form").addEventListener("submit", async (e) => {
             e.preventDefault();
 
             if (selectedFiles.length === 0) {
-                alert("Lütfen önce fotoğraf seçin.");
+                alert("Lütfen önce fotograf secin.");
                 return;
             }
 
@@ -255,15 +353,15 @@
 
             try {
                 await Promise.all(uploadPromises);
-                showInfoAlert("Fotoğraflar başarıyla yüklendi!");
+                showInfoAlert("Fotograflar basariyla yuklendi. Belirtilen tarihte ekledikleriniz listelenecek. Herkes sizin gibi iyi niyetli degil maalesef. ");
             } catch (err) {
                 console.error(err);
-                showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin.");
+                showErrorAlert("Bir hata olustu, lütfen tekrar deneyin.");
             } finally {
                 selectedFiles = [];
                 previewArea.innerHTML = '';
                 uploadButton.disabled = true;
-                uploadButton.textContent = 'Seçilenleri Yükle';
+                uploadButton.textContent = 'Secilenleri Yükle';
                 fileInput.value = '';
 
                 refreshGallery();
@@ -294,8 +392,8 @@
                 setTimeout(() => {
                     alertBox.classList.add("hidden");
                     alertBox.classList.remove("animate__fadeOutUp");
-                }, 500);
-            }, 2500);
+                }, 1500);
+            }, 3500);
         }
 
         function showErrorAlert(message) {

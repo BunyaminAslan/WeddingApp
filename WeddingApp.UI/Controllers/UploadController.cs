@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Wedding.Repository.Interfaces;
+using WeddingApp.UI.Cache;
 
 namespace WeddingApp.UI.Controllers
 {
@@ -9,12 +10,54 @@ namespace WeddingApp.UI.Controllers
     {
         private readonly CloudinaryService _cloudinaryService;
         private readonly IPhotoRepository _photoService;
+        private readonly IUploadQueue _uploadCache;
 
-        public UploadController(CloudinaryService cloudinaryService, IPhotoRepository photoService)
+        public UploadController(CloudinaryService cloudinaryService, IPhotoRepository photoService, IUploadQueue uploadCache)
         {
             _cloudinaryService = cloudinaryService;
             _photoService = photoService;
+            _uploadCache = uploadCache;
         }
+        public class CachedUpload
+        {
+            public string FileName { get; set; }
+            public string Base64 { get; set; }
+            public string ContentType { get; set; }
+            public string Ip { get; set; }
+            public string Device { get; set; }
+            public DateTime ReceivedAt { get; set; }
+        }
+
+        [RequestSizeLimit(600_000_000)] // örnek: 200MB
+        [HttpPost("multi")]
+        public async Task<IActionResult> UploadImages([FromForm] List<IFormFile> files)
+        {
+            foreach (var file in files)
+            {
+                if (file.Length == 0) continue;
+
+                using var ms = new MemoryStream();
+                await file.CopyToAsync(ms);
+                var base64 = Convert.ToBase64String(ms.ToArray());
+
+                var cacheItem = new CachedUpload
+                {
+                    FileName = file.FileName,
+                    Base64 = base64,
+                    ContentType = file.ContentType,
+                    ReceivedAt = DateTime.UtcNow,
+                    Ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+                         ?? HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    Device = Request.Headers["User-Agent"].ToString()
+                };
+
+                _uploadCache.Enqueue(cacheItem);
+            }
+
+            return Ok(new { message = "Fotoğraflar sıraya alındı, birazdan yüklenecek." });
+        }
+
+
 
         [HttpPost("image")]
         public async Task<IActionResult> UploadImage([FromForm] IFormFile file)

@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  weddingapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: weddingapp
+    ports:
+      - "5000:80"
+    restart: always

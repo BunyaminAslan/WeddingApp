@@ -328,49 +328,39 @@
             e.preventDefault();
 
             if (selectedFiles.length === 0) {
-                alert("Lütfen önce fotograf secin.");
+                alert("Lütfen önce fotoğraf seçin.");
                 return;
             }
 
-            // SHOW LOADER
             document.getElementById("loader").classList.remove("hidden");
-
             uploadButton.disabled = true;
             uploadButton.textContent = "Yükleniyor...";
 
-            const uploadPromises = selectedFiles.map(file => {
-                const formData = new FormData();
-                formData.append("file", file);
-
-                return fetch("/api/upload/image", {
-                    method: "POST",
-                    body: formData
-                }).then(res => {
-                    if (!res.ok) throw new Error("Upload failed");
-                    return res.json();
-                });
-            });
+            const formData = new FormData();
+            selectedFiles.forEach(file => formData.append("files", file));
 
             try {
-                await Promise.all(uploadPromises);
+                const response = await fetch("/api/upload/multi", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Upload failed");
+
                 showInfoAlert("Fotograflar basariyla yuklendi. Belirtilen tarihte ekledikleriniz listelenecek. Herkes sizin gibi iyi niyetli degil maalesef. ");
             } catch (err) {
                 console.error(err);
-                showErrorAlert("Bir hata olustu, lütfen tekrar deneyin.");
+                showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin.");
             } finally {
                 selectedFiles = [];
                 previewArea.innerHTML = '';
-                uploadButton.disabled = true;
-                uploadButton.textContent = 'Secilenleri Yükle';
                 fileInput.value = '';
-
+                uploadButton.disabled = true;
+                uploadButton.textContent = 'Seçilenleri Yükle';
                 refreshGallery();
-
-                // HIDE LOADER
                 document.getElementById("loader").classList.add("hidden");
             }
         });
-
 
         window.addEventListener('DOMContentLoaded', refreshGallery);
 

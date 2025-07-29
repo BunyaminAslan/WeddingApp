@@ -1,7 +1,6 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using Microsoft.Extensions.Options;
-using WeddingApp.UI.ImageUpload;
+using System.Net;
 
 public class CloudinaryService
 {
@@ -20,7 +19,30 @@ public class CloudinaryService
 
     public Cloudinary GetClient() => _cloudinary;
 
-    public async Task<string> UploadImageAsync(IFormFile file)
+    public async Task<string> UploadImageAsync(Stream stream, string fileName)
+    {
+        stream.Position = 0; // 
+
+        var uploadParams = new ImageUploadParams
+        {
+            File = new FileDescription(fileName, stream),
+            PublicId = Guid.NewGuid().ToString(), // veya fileName olmadan random id
+            Overwrite = false,
+            Folder = "wedding-uploads", // opsiyonel klasör
+            UseFilename = true,
+            UniqueFilename = true
+        };
+
+        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+        if (uploadResult.StatusCode == HttpStatusCode.OK)
+        {
+            return uploadResult.SecureUrl.ToString(); // ✅ URL'yi döndür
+        }
+
+        return null; // ya da throw new Exception("Upload failed");
+    }
+public async Task<string> UploadImageAsync(IFormFile file)
     {
         try
         {

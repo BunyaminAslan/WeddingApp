@@ -3,7 +3,9 @@ using System;
 using Wedding.Repository;
 using Wedding.Repository.Interfaces;
 using Wedding.Repository.Services;
+using WeddingApp.UI.Cache;
 using WeddingApp.UI.ImageUpload;
+using WeddingApp.UI.Jop;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,13 +31,14 @@ builder.Services.AddDbContext<Supabase_WeddingDbContext>(options =>
 
 //builder.Services.AddDbContext<Supabase_WeddingDbContext>(options =>
 //    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHostedService<UploadJob>();
 
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
-
+builder.Services.AddSingleton<IUploadQueue, UploadQueue>();
 builder.Services.AddSingleton<CloudinaryService>();
 
 var app = builder.Build();

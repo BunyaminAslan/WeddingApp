@@ -38,7 +38,7 @@ namespace WeddingApp.UI.Jop
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"[JOB ERROR] {ex.Message}");
+                        Console.WriteLine($"{DateTime.Now} - [JOB ERROR] {ex.Message}");
                     }
                 }
             }, _cts.Token);
@@ -51,8 +51,8 @@ namespace WeddingApp.UI.Jop
             if (_isLock) return;
             _isLock = true;
 
-            Console.WriteLine("--JOB STARTED--");
-            Console.WriteLine($"Queue item count: {_queue.Count}");
+            Console.WriteLine($"{DateTime.Now} --JOB STARTED--");
+            Console.WriteLine($"{DateTime.Now} --Queue item count: {_queue.Count}");
 
             var items = _queue.DequeueBatch(50); // batch size -> memory kontrol
             if (!items.Any())
@@ -61,7 +61,7 @@ namespace WeddingApp.UI.Jop
                 return;
             }
 
-            Console.WriteLine($"Processing {items.Count} items...");
+            Console.WriteLine($"{DateTime.Now} Processing {items.Count} items...");
 
             using var scope = _sp.CreateScope();
             var cloudinary = scope.ServiceProvider.GetRequiredService<CloudinaryService>();
@@ -94,13 +94,13 @@ namespace WeddingApp.UI.Jop
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[JOB ERROR] File {item.FileName} - {ex.Message}");
+                    Console.WriteLine($"{DateTime.Now} - [JOB ERROR] File {item.FileName} - {ex.Message}");
                 }
             }
 
             await photoService.SaveAsync();
 
-            Console.WriteLine("--JOB COMPLETED SUCCESSFULLY--");
+            Console.WriteLine($"{DateTime.Now} --JOB COMPLETED SUCCESSFULLY--");
             _isLock = false;
         }
 

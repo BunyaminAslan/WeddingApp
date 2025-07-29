@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using Wedding.Repository.Interfaces;
 using WeddingApp.UI.Cache;
 
@@ -32,6 +33,9 @@ namespace WeddingApp.UI.Controllers
         [HttpPost("multi")]
         public async Task<IActionResult> UploadImages([FromForm] List<IFormFile> files)
         {
+
+            Log.Logger.Information($"UploadImages method started. Files Count : {files.Count}");
+
             foreach (var file in files)
             {
                 if (file.Length == 0) continue;
@@ -46,13 +50,14 @@ namespace WeddingApp.UI.Controllers
                     Base64 = base64,
                     ContentType = file.ContentType,
                     ReceivedAt = DateTime.UtcNow,
-                    Ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
-                         ?? HttpContext.Connection.RemoteIpAddress?.ToString(),
+                    Ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "1",
                     Device = Request.Headers["User-Agent"].ToString()
                 };
 
                 _uploadCache.Enqueue(cacheItem);
             }
+
+            Log.Logger.Information($"UploadImages method succesfully done. Queue Count : {_uploadCache.Count}");
 
             return Ok(new { message = "Fotoğraflar sıraya alındı, birazdan yüklenecek." });
         }

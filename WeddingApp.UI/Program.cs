@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using System;
+using Serilog;
+using Serilog.Formatting.Json;
 using Wedding.Repository;
 using Wedding.Repository.Interfaces;
 using Wedding.Repository.Services;
 using WeddingApp.UI.Cache;
 using WeddingApp.UI.ImageUpload;
 using WeddingApp.UI.Jop;
+using WeddingApp.UI.Logging;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,12 +25,24 @@ builder.Services.Configure<CloudinarySettings>(
 //    options.ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET");
 //});
 
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithMachineName()
+    .WriteTo.Console()
+    //.WriteTo.File("../RsCBA/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+// Varsayýlan logger'ý Serilog ile deðiþtir
+builder.Host.UseSerilog();
+
 
 builder.Configuration["ConnectionStrings:DefaultConnection"] = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Limits.MaxRequestBodySize = 100_000_000; // 100MB
+    options.Limits.MaxRequestBodySize = 600_000_000; // 100MB
 });
 
 
@@ -47,6 +62,10 @@ builder.Services.AddSingleton<IUploadQueue, UploadQueue>();
 builder.Services.AddSingleton<CloudinaryService>();
 
 var app = builder.Build();
+
+//app.UseSerilogRequestLogging();
+
+app.UseMiddleware<RequestTracingMiddleware>();
 
 app.UseDeveloperExceptionPage();
 

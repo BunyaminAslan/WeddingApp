@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using System.Diagnostics;
 using WeddingApp.UI.Models;
 
@@ -19,7 +20,6 @@ namespace WeddingApp.UI.Controllers
         }
         [Route("Sino/Photos/{rs}")]
         public IActionResult Photos(string rs) {
-
 
             if (rs != "cba-rs2133") return BadRequest();
 

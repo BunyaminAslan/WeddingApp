@@ -17,6 +17,15 @@ namespace WeddingApp.UI.Controllers
         {
             return View();
         }
+        [Route("Sino/Photos/{rs}")]
+        public IActionResult Photos(string rs) {
+
+
+            if (rs != "cba-rs2133") return BadRequest();
+
+            return View();
+
+        }
 
         public IActionResult Privacy()
         {

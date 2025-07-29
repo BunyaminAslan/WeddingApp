@@ -109,6 +109,33 @@ namespace WeddingApp.UI.Controllers
             }
         }
 
+
+        [HttpGet("private/photos")]
+        public async Task<IActionResult> PhotosAsync([FromServices] CloudinaryService cloudinaryService)
+        {
+            try
+            {
+                var photos = (await _photoService.GetAllAsync())
+                    .OrderByDescending(p => p.created_at)
+                    .Select(p => new
+                    {
+                        url = cloudinaryService.GetAuthenticatedUrl(p.PublicId, p.Extension)
+                    })
+                    .ToList();
+
+                return Ok(photos);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = "Galeri listelenirken bir hata oluştu",
+                    error = ex.Message
+                });
+            }
+        }
+
         //Slider Photo
 
         [HttpPost("slider/image")]

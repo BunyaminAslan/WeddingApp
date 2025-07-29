@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeddingApp.UI", "WeddingApp.UI\WeddingApp.UI.csproj", "{441EF8DC-133E-44A3-B5E8-D86F6F2E9922}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeddingApp.UI", "WeddingApp.UI\WeddingApp.UI.csproj", "{441EF8DC-133E-44A3-B5E8-D86F6F2E9922}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wedding.Repository", "Wedding.Repository\Wedding.Repository.csproj", "{F1F78929-9950-4ABC-A24E-998B2E44D984}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wedding.Repository", "Wedding.Repository\Wedding.Repository.csproj", "{F1F78929-9950-4ABC-A24E-998B2E44D984}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wedding.Model", "Wedding.Model\Wedding.Model.csproj", "{D686B7B8-7455-4C71-A386-5AA1F76392AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wedding.Model", "Wedding.Model\Wedding.Model.csproj", "{D686B7B8-7455-4C71-A386-5AA1F76392AC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{03C3925A-1D4E-418C-A8FF-7DA7A1B36825}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -28,7 +28,7 @@ namespace WeddingApp.UI.Controllers
             public DateTime ReceivedAt { get; set; }
         }
 
-        [RequestSizeLimit(100_000_000)] // örnek: 100MB
+        [RequestSizeLimit(600_000_000)] // örnek: 100MB
         [HttpPost("multi")]
         public async Task<IActionResult> UploadImages([FromForm] List<IFormFile> files)
         {

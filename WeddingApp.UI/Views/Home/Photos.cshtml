@@ -134,16 +134,16 @@
     <!-- Arka Plan Slider -->
     <div class="background-slider">
         <!-- Fotograf Slide 1 (Kendi fotografınızla degistirin) -->
-        <div class="slide active" style="background-image: url('assest/Biz.JPG');"></div>
+        <div class="slide active" style="background-image: url('../../assest/Biz.JPG');"></div>
 
         <!-- Fotograf Slide 2 (Kendi fotografınızla degistirin) -->
-        <div class="slide" style="background-image: url('assest/Biz2.JPG');"></div>
-        <div class="slide" style="background-image: url('assest/Analar.JPG');"></div>
-        <div class="slide" style="background-image: url('assest/Jehat.JPG');"></div>
+        <div class="slide" style="background-image: url('../../assest/Biz2.JPG');"></div>
+        <div class="slide" style="background-image: url('../../assest/Analar.JPG');"></div>
+        <div class="slide" style="background-image: url('../../assest/Jehat.JPG');"></div>
         <!-- Video Slide (Kendi videonuzla degistirin) -->
         <div class="slide">
             <video class="background-video" autoplay muted loop playsinline>
-                <source src="assest/IMG_7542.MP4" type="video/mp4">
+                <source src="../../assest/IMG_7542.MP4" type="video/mp4">
                 Tarayıcınız video etiketini desteklemiyor.
             </video>
         </div>
@@ -177,87 +177,11 @@
         const photoGallery = document.getElementById('photo-gallery');
         let selectedFiles = [];
 
-        // Hedef tarih (Yıl, Ay-1, Gün, Saat, Dakika)
-        const targetDate = new Date(2025, 8, 6, 0, 30, 0); // 8 = Eylül (0-indexli)
-
-        function updateCountdown() {
-            const now = new Date();
-            const diff = targetDate - now;
-
-            if (diff <= 0) {
-                document.querySelector('.countdown-container').innerHTML = `
-                                <h2>Zamanı Geldi :) </h2>`;
-                document.querySelector('.overtime').innerHTML = '';
-                return;
-            }
-
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const minutes = Math.floor((diff / (1000 * 60)) % 60);
-            const seconds = Math.floor((diff / 1000) % 60);
-
-            document.getElementById("days").innerText = String(days).padStart(2, '0');
-            document.getElementById("hours").innerText = String(hours).padStart(2, '0');
-            document.getElementById("minutes").innerText = String(minutes).padStart(2, '0');
-            document.getElementById("seconds").innerText = String(seconds).padStart(2, '0');
-        }
-
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-
-        //-------------------------------
-
-        // Dosya secildiginde önizleme ve buton aktiflesir
-        fileInput.addEventListener('change', (event) => {
-            previewArea.innerHTML = '';
-            selectedFiles = Array.from(event.target.files);
-
-            if (selectedFiles.length > 0) {
-                uploadButton.disabled = false;
-                uploadButton.textContent = `${selectedFiles.length} Fotografı Yükle`;
-
-                selectedFiles.forEach(file => {
-                    if (file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-
-                        reader.onload = (e) => {
-                            const previewContainer = document.createElement('div');
-                            previewContainer.classList.add('preview-image-container');
-
-                            const img = document.createElement('img');
-                            img.classList.add('preview-image');
-                            img.src = e.target.result;
-
-                            previewContainer.appendChild(img);
-                            previewArea.appendChild(previewContainer);
-                        };
-
-                        reader.readAsDataURL(file);
-                    }
-                });
-            } else {
-                uploadButton.disabled = true;
-                uploadButton.textContent = 'Secilenleri Yükle';
-            }
-        });
-
-        function triggerDownload(url, filename = 'download.jpg') {
-            fetch(url)
-                .then(res => res.blob())
-                .then(blob => {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                });
-        }
-
+      
 
         // Galeriyi backend'den günceller
         function refreshGallery() {
-            fetch('/api/upload/photos')
+            fetch('/api/upload/private/photos')
                 .then(res => res.json())
                 .then(images => {
                     photoGallery.innerHTML = '';
@@ -296,44 +220,7 @@
                 });
         }
 
-        // Yükleme butonuna basıldıgında secilen tüm dosyaları gönder
-        document.getElementById("upload-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            if (selectedFiles.length === 0) {
-                alert("Lütfen önce fotoğraf seçin.");
-                return;
-            }
-
-            document.getElementById("loader").classList.remove("hidden");
-            uploadButton.disabled = true;
-            uploadButton.textContent = "Yükleniyor...";
-
-            const formData = new FormData();
-            selectedFiles.forEach(file => formData.append("files", file));
-
-            try {
-                const response = await fetch("/api/upload/multi", {
-                    method: "POST",
-                    body: formData
-                });
-
-                if (!response.ok) throw new Error("Upload failed");
-
-                showInfoAlert("Fotograflar basariyla yuklendi. Belirtilen tarihte ekledikleriniz listelenecek. Herkes sizin gibi iyi niyetli degil maalesef. ");
-            } catch (err) {
-                console.error(err);
-                showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin.");
-            } finally {
-                selectedFiles = [];
-                previewArea.innerHTML = '';
-                fileInput.value = '';
-                uploadButton.disabled = true;
-                uploadButton.textContent = 'Seçilenleri Yükle';
-                refreshGallery();
-                document.getElementById("loader").classList.add("hidden");
-            }
-        });
+        
 
         window.addEventListener('DOMContentLoaded', refreshGallery);
 

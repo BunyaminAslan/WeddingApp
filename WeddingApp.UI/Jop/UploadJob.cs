@@ -8,8 +8,10 @@ namespace WeddingApp.UI.Jop
     {
         private readonly IUploadQueue _queue;
         private readonly IServiceProvider _sp;
-        private Timer _timer;
-        private bool isLock = false;
+        private Task _backgroundTask;
+        private CancellationTokenSource _cts;
+        private bool _isLock = false;
+
         public UploadJob(IUploadQueue queue, IServiceProvider sp)
         {
             _queue = queue;
@@ -18,25 +20,48 @@ namespace WeddingApp.UI.Jop
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _timer = new Timer(Execute, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
+            _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
+
+            _backgroundTask = Task.Run(async () =>
+            {
+                while (await timer.WaitForNextTickAsync(_cts.Token))
+                {
+                    try
+                    {
+                        await ExecuteAsync();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Uygulama kapanırken task iptal ediliyor
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[JOB ERROR] {ex.Message}");
+                    }
+                }
+            }, _cts.Token);
+
             return Task.CompletedTask;
         }
 
-        private async void Execute(object state)
+        private async Task ExecuteAsync()
         {
-            if (isLock) return;
+            if (_isLock) return;
+            _isLock = true;
 
-            isLock = true;
-            Console.WriteLine("--JOP STARTED--");
-            Console.WriteLine($"queue item count : {_queue.Count}");
+            Console.WriteLine("--JOB STARTED--");
+            Console.WriteLine($"Queue item count: {_queue.Count}");
 
-            var items = _queue.DequeueBatch(100);
+            var items = _queue.DequeueBatch(50); // batch size -> memory kontrol
             if (!items.Any())
             {
-                isLock = false; return;
+                _isLock = false;
+                return;
             }
 
-            Console.WriteLine("Get 100 item");
+            Console.WriteLine($"Processing {items.Count} items...");
 
             using var scope = _sp.CreateScope();
             var cloudinary = scope.ServiceProvider.GetRequiredService<CloudinaryService>();
@@ -46,8 +71,11 @@ namespace WeddingApp.UI.Jop
             {
                 try
                 {
-                    var bytes = Convert.FromBase64String(item.Base64);
-                    using var ms = new MemoryStream(bytes);
+                    // Base64 -> byte array
+                    byte[] bytes = Convert.FromBase64String(item.Base64);
+
+                    // MemoryStream kullanımı (yazılabilir=false)
+                    await using var ms = new MemoryStream(bytes, writable: false);
 
                     var url = await cloudinary.UploadImageAsync(ms, item.FileName);
                     var ext = Path.GetExtension(item.FileName)?.TrimStart('.').ToLowerInvariant() ?? "jpg";
@@ -60,22 +88,25 @@ namespace WeddingApp.UI.Jop
                         Ip = item.Ip,
                         Device = item.Device
                     });
+
+                    // Belleği serbest bırak
+                    bytes = null;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"ERROR!!{item.Base64} - {ex.Message}");
+                    Console.WriteLine($"[JOB ERROR] File {item.FileName} - {ex.Message}");
                 }
             }
 
             await photoService.SaveAsync();
 
-            Console.WriteLine("-- Successfully Done --");
-            isLock = false;
+            Console.WriteLine("--JOB COMPLETED SUCCESSFULLY--");
+            _isLock = false;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _timer?.Dispose();
+            _cts?.Cancel();
             return Task.CompletedTask;
         }
     }

@@ -25,6 +25,11 @@ builder.Services.Configure<CloudinarySettings>(
 
 builder.Configuration["ConnectionStrings:DefaultConnection"] = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 100_000_000; // 100MB
+});
+
 
 builder.Services.AddDbContext<Supabase_WeddingDbContext>(options =>
     options.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]));

@@ -96,7 +96,7 @@
                 </svg>
             </div>
         </div>
-        <p class="mt-4 text-xl text-white animate__animated animate__fadeInUp animate__infinite">...</p>
+        <p class="mt-4 text-xl text-white animate__animated animate__fadeInUp animate__infinite" id="loadText">...</p>
     </div>
 
 
@@ -213,7 +213,7 @@
 
             if (diff <= 0) {
                 document.querySelector('.countdown-container').innerHTML = `
-                        <h2>Zamanı Geldi :) </h2>`;
+                                <h2>Zamanı Geldi :) </h2>`;
                 document.querySelector('.overtime').innerHTML = '';
                 return;
             }
@@ -298,14 +298,15 @@
                             const img = document.createElement('img');
                             img.classList.add('gallery-item');
                             img.src = photo.url;
+                            img.loading = "lazy";
 
                             const downloadBtn = document.createElement('button');
                             downloadBtn.classList.add('download-icon');
                             downloadBtn.innerHTML = `
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24">
-                                    <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v2h16v-2z"/>
-                                </svg>
-                            `;
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24">
+                                            <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v2h16v-2z"/>
+                                        </svg>
+                                    `;
 
                             downloadBtn.addEventListener('click', () => {
                                 const fileName = photo.url.split('/').pop().split('?')[0]; // filename from URL
@@ -336,18 +337,29 @@
             uploadButton.disabled = true;
             uploadButton.textContent = "Yükleniyor...";
 
-            const formData = new FormData();
-            selectedFiles.forEach(file => formData.append("files", file));
-
             try {
-                const response = await fetch("/api/upload/multi", {
-                    method: "POST",
-                    body: formData
-                });
+                const chunkSize = 10;
 
-                if (!response.ok) throw new Error("Upload failed");
+                for (let i = 0; i < selectedFiles.length; i += chunkSize) {
 
-                showInfoAlert("Fotograflar basariyla yuklendi. Belirtilen tarihte ekledikleriniz listelenecek. Herkes sizin gibi iyi niyetli degil maalesef. ");
+                    const chunk = selectedFiles.slice(i, i + chunkSize);
+
+                    const formData = new FormData();
+                    chunk.forEach(file => formData.append("files", file));
+
+                    const response = await fetch("/api/upload/multi", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (!response.ok) throw new Error("Upload failed");
+
+                    document.getElementById("loadText").innerHTML = `${Math.floor(i / chunkSize) + 1} fotograf  yüklendi...`;
+
+                    // console.log(`Chunk ${Math.floor(i / chunkSize) + 1} yüklendi`);
+                }
+
+                showInfoAlert("Fotoğraflar başarıyla yüklendi. Belirtilen tarihte ekledikleriniz listelenecek. Herkes sizin gibi iyi niyetli değil maalesef.");
             } catch (err) {
                 console.error(err);
                 showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin.");

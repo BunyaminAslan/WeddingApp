@@ -74,17 +74,17 @@ public async Task<string> UploadImageAsync(IFormFile file)
     {
         try
         {
-            var fullPublicId = $"{publicId}.{extension}";
+            //var fullPublicId = $"{publicId}.{extension}";
 
             var url = _cloudinary.Api.UrlImgUp
-                .Type("authenticated")
+                //.Type("authenticated")
                 .Secure(true)
                 .Signed(true)
-                .Version(DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
+                .Version(DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()).BuildUrl($"{publicId}");
                 //.PublicId(publicId)
-                .BuildUrl($"{publicId}.{extension}");
+                //.BuildUrl($"{publicId}");
 
-            return url;
+            return url.Replace(".heic", $".{extension}");
         }
         catch (Exception ex)
         {

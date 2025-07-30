@@ -196,6 +196,7 @@
                             const img = document.createElement('img');
                             img.classList.add('gallery-item');
                             img.src = photo.url;
+                            img.loading = "lazy";
 
                             const downloadBtn = document.createElement('button');
                             downloadBtn.classList.add('download-icon');

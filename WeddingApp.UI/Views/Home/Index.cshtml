@@ -338,7 +338,7 @@
             uploadButton.textContent = "Yükleniyor...";
 
             try {
-                const chunkSize = 10;
+                const chunkSize = 3;
                 const concurrencyLimit = 3; // aynı anda 3 istek
 
                 // Chunklara ayır
@@ -359,7 +359,12 @@
 
                         const response = await fetch("/api/upload/multi", {
                             method: "POST",
-                            body: formData
+                            body: formData,
+                            headers: {
+                                "Accept": "*/*",
+                                "Cache-Control": "no-cache",
+                                "Pragma": "no-cache"
+                            }
                         });
                         if (!response.ok) throw new Error("Upload failed");
                     }));

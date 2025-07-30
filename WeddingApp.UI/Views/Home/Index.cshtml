@@ -243,25 +243,25 @@
                 uploadButton.disabled = false;
                 uploadButton.textContent = `${selectedFiles.length} Fotografı Yükle`;
 
-                selectedFiles.forEach(file => {
-                    if (file.type.startsWith('image/')) {
-                        const reader = new FileReader();
+                // selectedFiles.forEach(file => {
+                //     if (file.type.startsWith('image/')) {
+                //         const reader = new FileReader();
 
-                        reader.onload = (e) => {
-                            const previewContainer = document.createElement('div');
-                            previewContainer.classList.add('preview-image-container');
+                //         reader.onload = (e) => {
+                //             const previewContainer = document.createElement('div');
+                //             previewContainer.classList.add('preview-image-container');
 
-                            const img = document.createElement('img');
-                            img.classList.add('preview-image');
-                            img.src = e.target.result;
+                //             const img = document.createElement('img');
+                //             img.classList.add('preview-image');
+                //             img.src = e.target.result;
 
-                            previewContainer.appendChild(img);
-                            previewArea.appendChild(previewContainer);
-                        };
+                //             previewContainer.appendChild(img);
+                //             previewArea.appendChild(previewContainer);
+                //         };
 
-                        reader.readAsDataURL(file);
-                    }
-                });
+                //         reader.readAsDataURL(file);
+                //     }
+                // });
             } else {
                 uploadButton.disabled = true;
                 uploadButton.textContent = 'Secilenleri Yükle';
@@ -339,27 +339,39 @@
 
             try {
                 const chunkSize = 10;
+                const concurrencyLimit = 3; // aynı anda 3 istek
 
+                // Chunklara ayır
+                const chunks = [];
                 for (let i = 0; i < selectedFiles.length; i += chunkSize) {
-
-                    const chunk = selectedFiles.slice(i, i + chunkSize);
-
-                    const formData = new FormData();
-                    chunk.forEach(file => formData.append("files", file));
-
-                    const response = await fetch("/api/upload/multi", {
-                        method: "POST",
-                        body: formData
-                    });
-
-                    if (!response.ok) throw new Error("Upload failed");
-
-                    document.getElementById("loadText").innerHTML = `İlk ${chunkSize} fotograf  yüklendi...`;
-
-                    // console.log(`Chunk ${Math.floor(i / chunkSize) + 1} yüklendi`);
+                    chunks.push(selectedFiles.slice(i, i + chunkSize));
                 }
 
-                showInfoAlert("Fotoğraflar başarıyla yüklendi. Belirtilen tarihte ekledikleriniz listelenecek. Herkes sizin gibi iyi niyetli değil maalesef.");
+                // Paralel upload yönetimi
+                let index = 0;
+                async function uploadNextBatch() {
+                    const batch = chunks.slice(index, index + concurrencyLimit);
+                    index += concurrencyLimit;
+
+                    await Promise.all(batch.map(async (chunk) => {
+                        const formData = new FormData();
+                        chunk.forEach(file => formData.append("files", file));
+
+                        const response = await fetch("/api/upload/multi", {
+                            method: "POST",
+                            body: formData
+                        });
+                        if (!response.ok) throw new Error("Upload failed");
+                    }));
+
+                    if (index < chunks.length) {
+                        await uploadNextBatch(); // sıradaki batch
+                    }
+                }
+
+                await uploadNextBatch();
+
+                showInfoAlert("Fotoğraflar başarıyla yüklendi.");
             } catch (err) {
                 console.error(err);
                 showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin.");
@@ -373,6 +385,7 @@
                 document.getElementById("loader").classList.add("hidden");
             }
         });
+
 
         window.addEventListener('DOMContentLoaded', refreshGallery);
 

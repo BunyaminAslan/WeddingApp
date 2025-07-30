@@ -363,8 +363,10 @@
                             headers: {
                                 "Accept": "*/*",
                                 "Cache-Control": "no-cache",
-                                "Pragma": "no-cache"
-                            }
+                                "Pragma": "no-cache",
+                                "Expect": ""
+                            },
+                            keepalive: true
                         });
                         if (!response.ok) throw new Error("Upload failed");
                     }));

@@ -53,7 +53,7 @@ namespace WeddingApp.UI.Logging
 
             _logger.LogInformation("HTTP Request:\n{Request}", requestJson);
 
-            // ✅ RESPONSE BAŞLIĞI BURADA DEĞİŞTİRİLİYOR
+            // RESPONSE BAŞLIĞI BURADA DEĞİŞTİRİLİYOR
             var originalBodyStream = context.Response.Body;
             using var responseBody = new MemoryStream();
             context.Response.Body = responseBody;

@@ -354,7 +354,7 @@
 
                     if (!response.ok) throw new Error("Upload failed");
 
-                    document.getElementById("loadText").innerHTML = `${Math.floor(i / chunkSize) + 1} fotograf  yüklendi...`;
+                    document.getElementById("loadText").innerHTML = `İlk ${chunkSize} fotograf  yüklendi...`;
 
                     // console.log(`Chunk ${Math.floor(i / chunkSize) + 1} yüklendi`);
                 }

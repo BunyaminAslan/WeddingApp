@@ -37,30 +37,30 @@ namespace WeddingApp.UI.Controllers
         {
             Log.Logger.Information($"UploadImages started. Files Count: {files.Count}");
 
-            foreach (var file in files)
-            {
-                if (file.Length == 0)
-                    continue;
+            //foreach (var file in files)
+            //{
+            //    if (file.Length == 0)
+            //        continue;
 
-                using var ms = new MemoryStream();
-                await file.CopyToAsync(ms);
+            //    using var ms = new MemoryStream();
+            //    await file.CopyToAsync(ms);
 
-                // Queue içine direkt byte[] olarak at
-                var cacheItem = new CachedUpload
-                {
-                    FileName = file.FileName,
-                    FileBytes = ms.ToArray(), // Base64 yok
-                    ContentType = file.ContentType,
-                    ReceivedAt = DateTime.UtcNow,
-                    Ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
-                         ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "1",
-                    Device = Request.Headers["User-Agent"].ToString()
-                };
+            //    // Queue içine direkt byte[] olarak at
+            //    var cacheItem = new CachedUpload
+            //    {
+            //        FileName = file.FileName,
+            //        FileBytes = ms.ToArray(), // Base64 yok
+            //        ContentType = file.ContentType,
+            //        ReceivedAt = DateTime.UtcNow,
+            //        Ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+            //             ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "1",
+            //        Device = Request.Headers["User-Agent"].ToString()
+            //    };
 
-                _uploadCache.Enqueue(cacheItem);
-            }
+            //    _uploadCache.Enqueue(cacheItem);
+            //}
 
-            Log.Logger.Information($"UploadImages done. Queue Count: {_uploadCache.Count}");
+            //Log.Logger.Information($"UploadImages done. Queue Count: {_uploadCache.Count}");
 
             return Ok(new { message = "Fotoğraflar sıraya alındı, birazdan yüklenecek." });
         }

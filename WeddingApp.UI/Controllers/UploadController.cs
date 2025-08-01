@@ -22,46 +22,48 @@ namespace WeddingApp.UI.Controllers
         public class CachedUpload
         {
             public string FileName { get; set; }
-            public string Base64 { get; set; }
+            //public string Base64 { get; set; }
+            public byte[] FileBytes { get; set; } //  Base64 yerine byte[]
+
             public string ContentType { get; set; }
             public string Ip { get; set; }
             public string Device { get; set; }
             public DateTime ReceivedAt { get; set; }
         }
 
-        [RequestSizeLimit(600_000_000)] // örnek: 100MB
+        [RequestSizeLimit(600_000_000)] // 600MB
         [HttpPost("multi")]
         public async Task<IActionResult> UploadImages([FromForm] List<IFormFile> files)
         {
-
-            Log.Logger.Information($"UploadImages method started. Files Count : {files.Count}");
+            Log.Logger.Information($"UploadImages started. Files Count: {files.Count}");
 
             foreach (var file in files)
             {
-                if (file.Length == 0) continue;
+                if (file.Length == 0)
+                    continue;
 
                 using var ms = new MemoryStream();
                 await file.CopyToAsync(ms);
-                var base64 = Convert.ToBase64String(ms.ToArray());
 
+                // Queue içine direkt byte[] olarak at
                 var cacheItem = new CachedUpload
                 {
                     FileName = file.FileName,
-                    Base64 = base64,
+                    FileBytes = ms.ToArray(), // Base64 yok
                     ContentType = file.ContentType,
                     ReceivedAt = DateTime.UtcNow,
-                    Ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "1",
+                    Ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+                         ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "1",
                     Device = Request.Headers["User-Agent"].ToString()
                 };
 
                 _uploadCache.Enqueue(cacheItem);
             }
 
-            Log.Logger.Information($"UploadImages method succesfully done. Queue Count : {_uploadCache.Count}");
+            Log.Logger.Information($"UploadImages done. Queue Count: {_uploadCache.Count}");
 
             return Ok(new { message = "Fotoğraflar sıraya alındı, birazdan yüklenecek." });
         }
-
 
 
         [HttpPost("image")]
@@ -98,10 +100,9 @@ namespace WeddingApp.UI.Controllers
                     .Select(p => new {
                         url = cloudinaryService.GetAuthenticatedUrl(p.PublicId, p.Extension)
                     })
-                    .ToList();
+                    .ToList().Take(10);
                 
-                return Ok(photos);
-                */
+                return Ok(photos);*/
                 return Ok(new CloudinaryService());
             }
             catch (Exception ex)

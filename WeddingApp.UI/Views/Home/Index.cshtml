@@ -362,46 +362,57 @@
                 // }
 
 
-                const chunkSize = 3;
-                const concurrencyLimit = 10; // aynı anda 3 istek
+                // const chunkSize = 3;
+                // const concurrencyLimit = 10; // aynı anda 3 istek
 
-                // Chunklara ayır
-                const chunks = [];
-                for (let i = 0; i < selectedFiles.length; i += chunkSize) {
-                    chunks.push(selectedFiles.slice(i, i + chunkSize));
-                }
+                // // Chunklara ayır
+                // const chunks = [];
+                // for (let i = 0; i < selectedFiles.length; i += chunkSize) {
+                //     chunks.push(selectedFiles.slice(i, i + chunkSize));
+                // }
               
 
-                //Paralel upload yönetimi
-                let index = 0;
-                async function uploadNextBatch() {
-                    const batch = chunks.slice(index, index + concurrencyLimit);
-                    index += concurrencyLimit;
+                // //Paralel upload yönetimi
+                // let index = 0;
+                // async function uploadNextBatch() {
+                //     const batch = chunks.slice(index, index + concurrencyLimit);
+                //     index += concurrencyLimit;
 
-                    await Promise.all(batch.map(async (chunk) => {
-                        const formData = new FormData();
-                        chunk.forEach(file => formData.append("files", file));
+                //     await Promise.all(batch.map(async (chunk) => {
+                //         const formData = new FormData();
+                //         chunk.forEach(file => formData.append("files", file));
 
-                        const response = await fetch("/api/upload/multi", {
-                            method: "POST",
-                            body: formData,
-                            headers: {
-                                "Accept": "*/*",
-                                "Cache-Control": "no-cache",
-                                "Pragma": "no-cache",
-                                "Expect": ""
-                            },
-                            keepalive: true
-                        });
-                        if (!response.ok) throw new Error("Upload failed");
-                    }));
+                //         const response = await fetch("/api/upload/multi", {
+                //             method: "POST",
+                //             body: formData,
+                //             headers: {
+                //                 "Accept": "*/*",
+                //                 "Cache-Control": "no-cache",
+                //                 "Pragma": "no-cache",
+                //                 "Expect": ""
+                //             },
+                //             keepalive: true
+                //         });
+                //         if (!response.ok) throw new Error("Upload failed");
+                //     }));
 
-                    if (index < chunks.length) {
-                        await uploadNextBatch(); // sıradaki batch
-                    }
-                }
+                //     if (index < chunks.length) {
+                //         await uploadNextBatch(); // sıradaki batch
+                //     }
+                // }
 
-                await uploadNextBatch();
+                // await uploadNextBatch();
+
+                const formData = new FormData();
+                selectedFiles.forEach(file => formData.append("files", file));
+
+                const response = await fetch("/api/upload/multi", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Upload failed");
+
 
                 showInfoAlert("Fotoğraflar başarıyla yüklendi.");
             } catch (err) {

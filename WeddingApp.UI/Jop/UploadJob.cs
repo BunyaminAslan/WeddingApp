@@ -72,10 +72,20 @@ namespace WeddingApp.UI.Jop
                 try
                 {
                     // Base64 -> byte array
-                    byte[] bytes = Convert.FromBase64String(item.Base64);
+                    //byte[] bytes = Convert.FromBase64String(item.Base64);
+
+                    byte[] bytes = item.FileBytes;
+
+                    //if (item.FileBytes != null)
+                    //{
+                    //    bytes = item.FileBytes;
+                    //}
 
                     // MemoryStream kullanımı (yazılabilir=false)
-                    await using var ms = new MemoryStream(bytes, writable: false);
+                    //await using var ms = new MemoryStream(bytes, writable: false);
+
+                    await using var ms = new MemoryStream(bytes, 0, bytes.Length, writable: false, publiclyVisible: true);
+
 
                     var url = await cloudinary.UploadImageAsync(ms, item.FileName);
                     var ext = Path.GetExtension(item.FileName)?.TrimStart('.').ToLowerInvariant() ?? "jpg";

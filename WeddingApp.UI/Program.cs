@@ -66,21 +66,16 @@ builder.Services.AddSingleton<CloudinaryService>();
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
+    var connString = builder.Configuration.GetConnectionString("Redis") ?? "redis:6379";
     try
     {
-        var connString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
-        var conn = ConnectionMultiplexer.Connect(connString);
-
-        if (conn.IsConnected)
-            return conn;
+        return ConnectionMultiplexer.Connect(connString);
     }
-    catch
+    catch (Exception ex)
     {
-        // Redis yoksa log basýp devam
-        Console.WriteLine("Redis connection failed, fallback to memory queue");
+        Console.WriteLine($"Redis connection failed: {ex.Message}");
+        return null;
     }
-
-    return null!; // Redis yoksa null veriyoruz
 });
 
 builder.Services.AddSingleton<IUploadQueue>(sp => {
@@ -93,6 +88,9 @@ builder.Services.AddSingleton<IUploadQueue>(sp => {
     {
         return new FallbackQueueService(new RedisQueueService(redisConn),memoryQueue);
     }
+
+    Console.WriteLine("Redis not available, using MemoryQueue");
+
 
     return memoryQueue;
 });

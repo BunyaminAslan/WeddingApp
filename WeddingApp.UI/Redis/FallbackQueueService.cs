@@ -10,7 +10,7 @@ namespace WeddingApp.UI.Redis
         private readonly IUploadQueue _memoryQueue;
 
 
-        public FallbackQueueService(/*IRedisQueueService redisQueue,*/ IUploadQueue memoryQueue, IUploadQueue redisQueue)
+        public FallbackQueueService(IUploadQueue redisQueue, IUploadQueue memoryQueue)
         {
             //_redisQueue = redisQueue;
             _memoryQueue = memoryQueue;

@@ -120,7 +120,7 @@ namespace WeddingApp.UI.Jop
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"{DateTime.Now} - [JOB ERROR] File {item.FileName} - {ex.Message}");
+                        Console.WriteLine($"{DateTime.Now} - [JOB ERROR] File {item.FileName} - {ex}");
                     }
                 }
 

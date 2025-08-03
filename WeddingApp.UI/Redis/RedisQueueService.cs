@@ -8,7 +8,6 @@ namespace WeddingApp.UI.Redis
     {
         private readonly IConnectionMultiplexer _redis;
 
-        public int Count => throw new NotImplementedException();
 
         public RedisQueueService(IConnectionMultiplexer redis)
         {
@@ -16,6 +15,8 @@ namespace WeddingApp.UI.Redis
 
             //if (_redis == null) return;
         }
+
+        public int Count => Convert.ToInt32(_redis.GetDatabase().ListLength("photoQueue"));
 
         public async Task EnqueueAsync(string key, string value)
         {

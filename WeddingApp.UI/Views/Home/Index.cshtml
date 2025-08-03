@@ -493,8 +493,11 @@
             files.forEach(f => formData.append("files", f));
 
             try {
-                return fetch("/api/upload/multi", {
+                return fetch("https://www.rscba.com/api/upload/multi", {
                     method: "POST",
+                    headers: {
+                        "Host": "rscba.com"
+                    },
                     body: formData
                 }).then(res => {
                     if (!res.ok) throw new Error('Upload failed');

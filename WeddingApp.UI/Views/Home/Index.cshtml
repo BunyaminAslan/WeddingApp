@@ -464,7 +464,35 @@
 
         function uploadToServer(files) {
             const formData = new FormData();
-            files.forEach(f => formData.append("files", f));
+            files.forEach(f => {
+                // Safari'nin Blob sorununu aşmak için File'a çevir
+                const safeFile = new File([f], f.name, { type: f.type });
+                formData.append("files", safeFile);
+            });
+
+            // Safari ise XMLHttpRequest fallback
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            if (isSafari) {
+                return new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("POST", "/api/upload/multi", true);
+
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            try {
+                                resolve(JSON.parse(xhr.responseText));
+                            } catch (e) {
+                                resolve(xhr.responseText);
+                            }
+                        } else {
+                            reject(new Error('Upload failed'));
+                        }
+                    };
+
+                    xhr.onerror = () => reject(new Error('Network error'));
+                    xhr.send(formData);
+                });
+            }
 
             return fetch("/api/upload/multi", {
                 method: "POST",

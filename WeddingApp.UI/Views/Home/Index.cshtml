@@ -504,7 +504,7 @@
                 processQueue();
             } catch (err) {
                 console.error(err);
-                if (err.contains("Error preparing Blob")) {
+                if (err.message && err.message.includes("Error preparing Blob")) {
 
                     showErrorAlert(" Gizli sekmede takiliyorsan foto yukleyemezsin, normal sekmede acip dene :) ")
                 }

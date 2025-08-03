@@ -14,10 +14,10 @@ namespace WeddingApp.UI.Controllers
     {
         private readonly CloudinaryService _cloudinaryService;
         private readonly IPhotoRepository _photoService;
-        private readonly IUploadQueue _uploadCache;
+        private readonly FallbackQueueService _uploadCache;
 
         private readonly IRedisQueueService _redisQueue;
-        public UploadController(CloudinaryService cloudinaryService, IPhotoRepository photoService, IUploadQueue uploadCache, IRedisQueueService redisQueue)
+        public UploadController(CloudinaryService cloudinaryService, IPhotoRepository photoService, FallbackQueueService uploadCache, IRedisQueueService redisQueue)
         {
             _cloudinaryService = cloudinaryService;
             _photoService = photoService;
@@ -58,6 +58,7 @@ namespace WeddingApp.UI.Controllers
                 //_uploadCache.Enqueue(cacheItem); 
                 #endregion
 
+                
                 await _uploadCache.EnqueueAsync("photoQueue", JsonConvert.SerializeObject(cacheItem));
 
             }

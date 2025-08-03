@@ -91,13 +91,13 @@ builder.Services.AddSingleton<IUploadQueue>(sp => {
 
     if(redisConn != null && redisConn.IsConnected)
     {
-        return new FallbackQueueService(new RedisQueueService(redisConn), memoryQueue);
+        return new FallbackQueueService(new RedisQueueService(redisConn));
     }
 
     return memoryQueue;
 });
 
-builder.Services.AddSingleton<IRedisQueueService, RedisQueueService>();
+//builder.Services.AddSingleton<IRedisQueueService, RedisQueueService>();
 
 
 var app = builder.Build();

@@ -4,7 +4,7 @@ using WeddingApp.UI.Models;
 
 namespace WeddingApp.UI.Redis
 {
-    public class RedisQueueService : IRedisQueueService,IUploadQueue
+    public class RedisQueueService : /*IRedisQueueService,*/IUploadQueue
     {
         private readonly IConnectionMultiplexer _redis;
 
@@ -14,13 +14,13 @@ namespace WeddingApp.UI.Redis
         {
             _redis = redis;
 
-            if (_redis == null) return;
+            //if (_redis == null) return;
         }
 
         public async Task EnqueueAsync(string key, string value)
         {
 
-            if(_redis is null) return;
+            //if(_redis is null) return;
             var db = _redis.GetDatabase();
             await db.ListRightPushAsync(key, value);
         }

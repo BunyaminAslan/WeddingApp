@@ -12,18 +12,16 @@ namespace WeddingApp.UI.Jop
     {
         private readonly IUploadQueue _queue;
 
-        private readonly IRedisQueueService _redisQueue;
 
         private readonly IServiceProvider _sp;
         private Task _backgroundTask;
         private CancellationTokenSource _cts;
         private bool _isLock = false;
 
-        public UploadJob(IUploadQueue queue, IRedisQueueService redisQueue, IServiceProvider sp)
+        public UploadJob(IUploadQueue queue, IServiceProvider sp)
         {
             _queue = queue;
             _sp = sp;
-            _redisQueue = redisQueue;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

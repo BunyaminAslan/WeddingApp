@@ -14,15 +14,14 @@ namespace WeddingApp.UI.Controllers
     {
         private readonly CloudinaryService _cloudinaryService;
         private readonly IPhotoRepository _photoService;
-        private readonly FallbackQueueService _uploadCache;
+        private readonly IUploadQueue _uploadCache;
 
-        private readonly IRedisQueueService _redisQueue;
-        public UploadController(CloudinaryService cloudinaryService, IPhotoRepository photoService, FallbackQueueService uploadCache, IRedisQueueService redisQueue)
+        //private readonly IRedisQueueService _redisQueue;
+        public UploadController(CloudinaryService cloudinaryService, IPhotoRepository photoService, IUploadQueue uploadCache)
         {
             _cloudinaryService = cloudinaryService;
             _photoService = photoService;
             _uploadCache = uploadCache;
-            _redisQueue = redisQueue;
         }
 
 

@@ -493,7 +493,7 @@
                 processQueue();
             } catch (err) {
                 console.error(err);
-                showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin.");
+                showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin. "+err);
             } finally {
                 selectedFiles = [];
                 previewArea.innerHTML = '';

@@ -8,6 +8,8 @@ using WeddingApp.UI.Cache;
 using WeddingApp.UI.ImageUpload;
 using WeddingApp.UI.Jop;
 using WeddingApp.UI.Logging;
+using StackExchange.Redis;
+using WeddingApp.UI.Redis;
 
 
 
@@ -24,6 +26,7 @@ builder.Services.Configure<CloudinarySettings>(
 //    options.ApiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY");
 //    options.ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET");
 //});
+
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -60,6 +63,41 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
 builder.Services.AddSingleton<IUploadQueue, UploadQueue>();
 builder.Services.AddSingleton<CloudinaryService>();
+
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    try
+    {
+        var connString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+        var conn = ConnectionMultiplexer.Connect(connString);
+
+        if (conn.IsConnected)
+            return conn;
+    }
+    catch
+    {
+        // Redis yoksa log basýp devam
+        Console.WriteLine("Redis connection failed, fallback to memory queue");
+    }
+
+    return null!; // Redis yoksa null veriyoruz
+});
+
+builder.Services.AddSingleton<IUploadQueue>(sp => {
+
+    var redisConn = sp.GetService<IConnectionMultiplexer>();
+
+    var memoryQueue = new UploadQueue();
+
+    if(redisConn != null && redisConn.IsConnected)
+    {
+        return new FallbackQueueService(new RedisQueueService(redisConn), memoryQueue);
+    }
+
+    return memoryQueue;
+});
+
+builder.Services.AddSingleton<IRedisQueueService, RedisQueueService>();
 
 var app = builder.Build();
 

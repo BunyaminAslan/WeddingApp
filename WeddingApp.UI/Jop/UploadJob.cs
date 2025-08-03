@@ -1,21 +1,29 @@
-﻿using Wedding.Model.DB;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
+using Wedding.Model.DB;
 using Wedding.Repository.Interfaces;
 using WeddingApp.UI.Cache;
+using WeddingApp.UI.Models;
+using WeddingApp.UI.Redis;
 
 namespace WeddingApp.UI.Jop
 {
     public class UploadJob : IHostedService
     {
         private readonly IUploadQueue _queue;
+
+        private readonly IRedisQueueService _redisQueue;
+
         private readonly IServiceProvider _sp;
         private Task _backgroundTask;
         private CancellationTokenSource _cts;
         private bool _isLock = false;
 
-        public UploadJob(IUploadQueue queue, IServiceProvider sp)
+        public UploadJob(IUploadQueue queue, IRedisQueueService redisQueue, IServiceProvider sp)
         {
             _queue = queue;
             _sp = sp;
+            _redisQueue = redisQueue;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -54,62 +62,73 @@ namespace WeddingApp.UI.Jop
             Console.WriteLine($"{DateTime.Now} --JOB STARTED--");
             Console.WriteLine($"{DateTime.Now} --Queue item count: {_queue.Count}");
 
-            var items = _queue.DequeueBatch(50); // batch size -> memory kontrol
-            if (!items.Any())
+            //var items = _queue.DequeueBatch(50); // batch size -> memory kontrol
+
+            var jsonItems = await _queue.DequeueBatchAsync("photoQueue", 50);
+
+            if (jsonItems.Count > 0)
             {
-                _isLock = false;
-                return;
-            }
+                var items = jsonItems
+                                .Select(i => JsonConvert.DeserializeObject<CachedUpload>(i))
+                                .Where(i => i != null)
+                                .ToList();//JsonConvert.DeserializeObject<List<CachedUpload>>(jsonItems);
 
-            Console.WriteLine($"{DateTime.Now} Processing {items.Count} items...");
-
-            using var scope = _sp.CreateScope();
-            var cloudinary = scope.ServiceProvider.GetRequiredService<CloudinaryService>();
-            var photoService = scope.ServiceProvider.GetRequiredService<IPhotoRepository>();
-
-            foreach (var item in items)
-            {
-                try
+                if (items is null || items.Count == 0)
                 {
-                    // Base64 -> byte array
-                    //byte[] bytes = Convert.FromBase64String(item.Base64);
+                    _isLock = false;
+                    return;
+                }
 
-                    byte[] bytes = item.FileBytes;
+                Console.WriteLine($"{DateTime.Now} Processing {items.Count} items...");
 
-                    //if (item.FileBytes != null)
-                    //{
-                    //    bytes = item.FileBytes;
-                    //}
+                using var scope = _sp.CreateScope();
+                var cloudinary = scope.ServiceProvider.GetRequiredService<CloudinaryService>();
+                var photoService = scope.ServiceProvider.GetRequiredService<IPhotoRepository>();
 
-                    // MemoryStream kullanımı (yazılabilir=false)
-                    //await using var ms = new MemoryStream(bytes, writable: false);
-
-                    await using var ms = new MemoryStream(bytes, 0, bytes.Length, writable: false, publiclyVisible: true);
-
-
-                    var url = await cloudinary.UploadImageAsync(ms, item.FileName);
-                    var ext = Path.GetExtension(item.FileName)?.TrimStart('.').ToLowerInvariant() ?? "jpg";
-                    if (ext == "heic") ext = "jpg";
-
-                    await photoService.AddAsync(new PhotoDb
+                foreach (var item in items)
+                {
+                    try
                     {
-                        PublicId = url,
-                        Extension = ext,
-                        Ip = item.Ip,
-                        Device = item.Device
-                    });
+                        // Base64 -> byte array
+                        //byte[] bytes = Convert.FromBase64String(item.Base64);
 
-                    // Belleği serbest bırak
-                    bytes = null;
+                        byte[] bytes = item.FileBytes;
+
+                        //if (item.FileBytes != null)
+                        //{
+                        //    bytes = item.FileBytes;
+                        //}
+
+                        // MemoryStream kullanımı (yazılabilir=false)
+                        //await using var ms = new MemoryStream(bytes, writable: false);
+
+                        await using var ms = new MemoryStream(bytes, 0, bytes.Length, writable: false, publiclyVisible: true);
+
+
+                        var url = await cloudinary.UploadImageAsync(ms, item.FileName);
+                        var ext = Path.GetExtension(item.FileName)?.TrimStart('.').ToLowerInvariant() ?? "jpg";
+                        if (ext == "heic") ext = "jpg";
+
+                        await photoService.AddAsync(new PhotoDb
+                        {
+                            PublicId = url,
+                            Extension = ext,
+                            Ip = item.Ip,
+                            Device = item.Device
+                        });
+
+                        // Belleği serbest bırak
+                        bytes = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"{DateTime.Now} - [JOB ERROR] File {item.FileName} - {ex.Message}");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"{DateTime.Now} - [JOB ERROR] File {item.FileName} - {ex.Message}");
-                }
+
+                await photoService.SaveAsync();
+
             }
-
-            await photoService.SaveAsync();
-
             Console.WriteLine($"{DateTime.Now} --JOB COMPLETED SUCCESSFULLY--");
             _isLock = false;
         }

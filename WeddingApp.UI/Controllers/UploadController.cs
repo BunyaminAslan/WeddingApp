@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Serilog;
 using Wedding.Repository.Interfaces;
 using WeddingApp.UI.Cache;
+using WeddingApp.UI.Models;
+using WeddingApp.UI.Redis;
 
 namespace WeddingApp.UI.Controllers
 {
@@ -13,23 +16,15 @@ namespace WeddingApp.UI.Controllers
         private readonly IPhotoRepository _photoService;
         private readonly IUploadQueue _uploadCache;
 
-        public UploadController(CloudinaryService cloudinaryService, IPhotoRepository photoService, IUploadQueue uploadCache)
+        private readonly IRedisQueueService _redisQueue;
+        public UploadController(CloudinaryService cloudinaryService, IPhotoRepository photoService, IUploadQueue uploadCache, IRedisQueueService redisQueue)
         {
             _cloudinaryService = cloudinaryService;
             _photoService = photoService;
             _uploadCache = uploadCache;
+            _redisQueue = redisQueue;
         }
-        public class CachedUpload
-        {
-            public string FileName { get; set; }
-            //public string Base64 { get; set; }
-            public byte[] FileBytes { get; set; } //  Base64 yerine byte[]
 
-            public string ContentType { get; set; }
-            public string Ip { get; set; }
-            public string Device { get; set; }
-            public DateTime ReceivedAt { get; set; }
-        }
 
         [RequestSizeLimit(600_000_000)] // 600MB
         [HttpPost("multi")]
@@ -45,7 +40,6 @@ namespace WeddingApp.UI.Controllers
                 using var ms = new MemoryStream();
                 await file.CopyToAsync(ms);
 
-                // Queue içine direkt byte[] olarak at
                 var cacheItem = new CachedUpload
                 {
                     FileName = file.FileName,
@@ -57,7 +51,15 @@ namespace WeddingApp.UI.Controllers
                     Device = Request.Headers["User-Agent"].ToString()
                 };
 
-                _uploadCache.Enqueue(cacheItem);
+                #region MemoryCache
+                // Queue içine direkt byte[] olarak at
+
+
+                //_uploadCache.Enqueue(cacheItem); 
+                #endregion
+
+                await _uploadCache.EnqueueAsync("photoQueue", JsonConvert.SerializeObject(cacheItem));
+
             }
 
             Log.Logger.Information($"UploadImages done. Queue Count: {_uploadCache.Count}");

@@ -12,3 +12,20 @@ services:
       - .env
     environment:
       - ASPNETCORE_URLS=http://+:80
+      - REDIS_CONNECTION=redis:6379
+    depends_on:
+      - redis
+  redis:
+    image: redis:7-alpine
+    container_name: weddingapp_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - wedding_network
+volumes:
+  redis_data:
+networks:
+  wedding_network:  

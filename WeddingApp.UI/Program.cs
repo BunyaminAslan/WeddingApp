@@ -100,11 +100,6 @@ builder.Services.AddSingleton<IUploadQueue>(sp => {
 builder.Services.AddSingleton<IRedisQueueService, RedisQueueService>();
 
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.Limits.MinRequestBodyDataRate = null;
-});
-
 var app = builder.Build();
 
 //app.UseSerilogRequestLogging();

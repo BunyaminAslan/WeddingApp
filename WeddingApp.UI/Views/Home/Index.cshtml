@@ -225,7 +225,7 @@
 
             if (diff <= 0) {
                 document.querySelector('.countdown-container').innerHTML = `
-                                                        <h2>Zamanı Geldi :) </h2>`;
+                                                                <h2>Zamanı Geldi :) </h2>`;
                 document.querySelector('.overtime').innerHTML = '';
                 return;
             }
@@ -315,10 +315,10 @@
                             const downloadBtn = document.createElement('button');
                             downloadBtn.classList.add('download-icon');
                             downloadBtn.innerHTML = `
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24">
-                                                                    <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v2h16v-2z"/>
-                                                                </svg>
-                                                            `;
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24">
+                                                                            <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v2h16v-2z"/>
+                                                                        </svg>
+                                                                    `;
 
                             downloadBtn.addEventListener('click', () => {
                                 const fileName = photo.url.split('/').pop().split('?')[0]; // filename from URL
@@ -475,22 +475,14 @@
                     return res.json();
                 });
             } catch (e) {
-                
-                try {
-                    console.warn("Fetch failed, falling back to XHR:", e);
-                    return new Promise((resolve, reject) => {
-                        const xhr = new XMLHttpRequest();
-                        xhr.open("POST", "/api/upload/multi");
-                        xhr.onload = () => xhr.status === 200 ? resolve(JSON.parse(xhr.responseText)) : reject();
-                        xhr.onerror = reject;
-                        xhr.send(formData);
-                    });
-                } catch (e2) {
-                    
-                    if (e2.contains("Error preparing Blob")) {
-                        throw new Error(" Gizli sekmede takiliyorsan foto yukleyemezsin, normal sekmede acip dene :) ")
-                    }
-                }
+                console.warn("Fetch failed, falling back to XHR:", e);
+                return new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("POST", "/api/upload/multi");
+                    xhr.onload = () => xhr.status === 200 ? resolve(JSON.parse(xhr.responseText)) : reject();
+                    xhr.onerror = reject;
+                    xhr.send(formData);
+                });
             }
         }
 
@@ -512,7 +504,11 @@
                 processQueue();
             } catch (err) {
                 console.error(err);
-                showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin. " + err);
+                if (err.contains("Error preparing Blob")) {
+
+                    showErrorAlert(" Gizli sekmede takiliyorsan foto yukleyemezsin, normal sekmede acip dene :) ")
+                }
+                else showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin. " + err);
             } finally {
                 selectedFiles = [];
                 previewArea.innerHTML = '';

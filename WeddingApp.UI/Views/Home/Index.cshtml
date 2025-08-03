@@ -507,7 +507,7 @@
                 console.warn("Fetch failed, falling back to XHR:", e);
                 return new Promise((resolve, reject) => {
                     const xhr = new XMLHttpRequest();
-                    xhr.open("POST", "/api/upload/multi");
+                    xhr.open("POST", "https://www.rscba.com/api/upload/multi");
                     xhr.onload = () => xhr.status === 200 ? resolve(JSON.parse(xhr.responseText)) : reject();
                     xhr.onerror = reject;
                     xhr.send(formData);

@@ -174,7 +174,19 @@
                 <button type="submit" id="upload-button" disabled>Secilenleri Yükle</button>
             </form>
         </section>
-
+       
+        <div id="upload-progress-container" class="hidden" style="margin-top: 15px; width: 100%; /* max-width: 500px; */">
+            <div style="background: #e0e0e0; border-radius: 12px; overflow: hidden; height: 22px;">
+                <div id="upload-progress"
+                     style="width:0%; background: linear-gradient(90deg, #4CAF50, #2ECC71);
+                    height:100%; text-align:center; color:white;
+                    font-weight: 600; font-size: 13px;
+                    line-height:22px; transition: width 0.4s ease;">
+                    0%
+                </div>
+            </div>
+        </div>
+       
         <section id="gallery-section">
             <h2>Yüklenen Fotograflar</h2>
             <h3 class="overtime">2025.09.06 - 00:30 da yüklenen tüm fotografları burada görebileceksiniz.</h3>
@@ -325,6 +337,144 @@
         }
 
         // Yükleme butonuna basıldıgında secilen tüm dosyaları gönder
+
+        // IndexedDB ayarları
+        const DB_NAME = 'PhotoUploaderDB';
+        const STORE_NAME = 'photos';
+        let db;
+        let isUploading = false;
+
+        // IndexedDB başlatma
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onupgradeneeded = (e) => {
+                    let db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    processQueue(); // Sayfa açıldığında yüklemeye devam et
+                    resolve();
+                };
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        function addPhotosToQueue(files) {
+
+            console.info("addPhotosToQueue started. File Count : " + files.length);
+
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                files.forEach(file => store.add({ file }));
+                tx.oncomplete = () => resolve();
+                tx.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        function getNextPhoto() {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.openCursor();
+                request.onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    if (cursor) resolve({ id: cursor.key, file: cursor.value.file });
+                    else resolve(null);
+                };
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        function deletePhoto(id) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                tx.objectStore(STORE_NAME).delete(id);
+                tx.oncomplete = () => resolve();
+                tx.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function processQueue() {
+            if (isUploading) return;
+            isUploading = true;
+
+            const totalCount = await getQueueCount();
+            if (totalCount > 0) {
+                document.getElementById("upload-progress-container").classList.remove("hidden");
+            }
+
+            let processedCount = 0;
+            let next = await getNextPhoto();
+
+            while (next) {
+                try {
+                    await uploadToServer([next.file]);
+                    await deletePhoto(next.id);
+
+                    processedCount++;
+                    let percent = Math.round((processedCount / totalCount) * 100);
+                    updateProgressBar(percent);
+
+                } catch (err) {
+                    console.error("Upload failed, retrying in 5s...", err);
+                    await new Promise(res => setTimeout(res, 5000));
+                }
+                next = await getNextPhoto();
+            }
+
+            isUploading = false;
+
+            // Yükleme tamamlanınca progress bar gizle
+            if (processedCount > 0) {
+                updateProgressBar(100);
+                setTimeout(() => {
+                    document.getElementById("upload-progress-container").classList.add("hidden");
+                    updateProgressBar(0);
+                }, 2000);
+            }
+        }
+        function getQueueCount() {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.count();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+        function updateProgressBar(percent) {
+            const bar = document.getElementById("upload-progress");
+            bar.style.width = percent + "%";
+            bar.textContent = percent + "%";
+
+            // Yükleme %80 üstüne çıkınca rengi değiştir
+            if (percent < 50) {
+                bar.style.background = "linear-gradient(90deg, #ff9800, #ffc107)";
+            } else if (percent < 80) {
+                bar.style.background = "linear-gradient(90deg, #03a9f4, #2196f3)";
+            } else {
+                bar.style.background = "linear-gradient(90deg, #4CAF50, #2ECC71)";
+            }
+        }
+
+        function uploadToServer(files) {
+            const formData = new FormData();
+            files.forEach(f => formData.append("files", f));
+
+            return fetch("/api/upload/multi", {
+                method: "POST",
+                body: formData
+            }).then(res => {
+                if (!res.ok) throw new Error('Upload failed');
+                return res.json();
+            });
+        }
+
         document.getElementById("upload-form").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -335,86 +485,12 @@
 
             document.getElementById("loader").classList.remove("hidden");
             uploadButton.disabled = true;
-            uploadButton.textContent = "Yükleniyor...";
+            uploadButton.textContent = "Sıraya alınıyor...";
 
             try {
-
-                // async function uploadWithXHR(files) {
-                //     return new Promise((resolve, reject) => {
-                //         const xhr = new XMLHttpRequest();
-                //         xhr.open("POST", "/api/upload/multi", true);
-
-                //         xhr.onload = () => {
-                //             if (xhr.status === 200) resolve();
-                //             else reject(xhr.statusText);
-                //         };
-                //         xhr.onerror = () => reject("Upload failed");
-
-                //         const formData = new FormData();
-                //         files.forEach(file => formData.append("files", file));
-
-                //         xhr.send(formData);
-                //     });
-                // }
-                // for (let i = 0; i < selectedFiles.length; i += 10) {
-                //     const chunk = selectedFiles.slice(i, i + 10);
-                //     await uploadWithXHR(chunk);
-                // }
-
-
-                // const chunkSize = 3;
-                // const concurrencyLimit = 10; // aynı anda 3 istek
-
-                // // Chunklara ayır
-                // const chunks = [];
-                // for (let i = 0; i < selectedFiles.length; i += chunkSize) {
-                //     chunks.push(selectedFiles.slice(i, i + chunkSize));
-                // }
-              
-
-                // //Paralel upload yönetimi
-                // let index = 0;
-                // async function uploadNextBatch() {
-                //     const batch = chunks.slice(index, index + concurrencyLimit);
-                //     index += concurrencyLimit;
-
-                //     await Promise.all(batch.map(async (chunk) => {
-                //         const formData = new FormData();
-                //         chunk.forEach(file => formData.append("files", file));
-
-                //         const response = await fetch("/api/upload/multi", {
-                //             method: "POST",
-                //             body: formData,
-                //             headers: {
-                //                 "Accept": "*/*",
-                //                 "Cache-Control": "no-cache",
-                //                 "Pragma": "no-cache",
-                //                 "Expect": ""
-                //             },
-                //             keepalive: true
-                //         });
-                //         if (!response.ok) throw new Error("Upload failed");
-                //     }));
-
-                //     if (index < chunks.length) {
-                //         await uploadNextBatch(); // sıradaki batch
-                //     }
-                // }
-
-                // await uploadNextBatch();
-
-                const formData = new FormData();
-                selectedFiles.forEach(file => formData.append("files", file));
-
-                const response = await fetch("/api/upload/multi", {
-                    method: "POST",
-                    body: formData
-                });
-
-                if (!response.ok) throw new Error("Upload failed");
-
-
-                showInfoAlert("Fotoğraflar başarıyla yüklendi.");
+                await addPhotosToQueue(selectedFiles);
+                showInfoAlert("Fotoğraflar sıraya alındı, arka planda yükleniyor.");
+                processQueue();
             } catch (err) {
                 console.error(err);
                 showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin.");
@@ -428,6 +504,113 @@
                 document.getElementById("loader").classList.add("hidden");
             }
         });
+
+        // IndexedDB'yi başlat
+        initDB();
+
+        // document.getElementById("upload-form").addEventListener("submit", async (e) => {
+        //     e.preventDefault();
+
+        //     if (selectedFiles.length === 0) {
+        //         alert("Lütfen önce fotoğraf seçin.");
+        //         return;
+        //     }
+
+        //     document.getElementById("loader").classList.remove("hidden");
+        //     uploadButton.disabled = true;
+        //     uploadButton.textContent = "Yükleniyor...";
+
+        //     try {
+
+        //         // async function uploadWithXHR(files) {
+        //         //     return new Promise((resolve, reject) => {
+        //         //         const xhr = new XMLHttpRequest();
+        //         //         xhr.open("POST", "/api/upload/multi", true);
+
+        //         //         xhr.onload = () => {
+        //         //             if (xhr.status === 200) resolve();
+        //         //             else reject(xhr.statusText);
+        //         //         };
+        //         //         xhr.onerror = () => reject("Upload failed");
+
+        //         //         const formData = new FormData();
+        //         //         files.forEach(file => formData.append("files", file));
+
+        //         //         xhr.send(formData);
+        //         //     });
+        //         // }
+        //         // for (let i = 0; i < selectedFiles.length; i += 10) {
+        //         //     const chunk = selectedFiles.slice(i, i + 10);
+        //         //     await uploadWithXHR(chunk);
+        //         // }
+
+
+        //         // const chunkSize = 3;
+        //         // const concurrencyLimit = 10; // aynı anda 3 istek
+
+        //         // // Chunklara ayır
+        //         // const chunks = [];
+        //         // for (let i = 0; i < selectedFiles.length; i += chunkSize) {
+        //         //     chunks.push(selectedFiles.slice(i, i + chunkSize));
+        //         // }
+              
+
+        //         // //Paralel upload yönetimi
+        //         // let index = 0;
+        //         // async function uploadNextBatch() {
+        //         //     const batch = chunks.slice(index, index + concurrencyLimit);
+        //         //     index += concurrencyLimit;
+
+        //         //     await Promise.all(batch.map(async (chunk) => {
+        //         //         const formData = new FormData();
+        //         //         chunk.forEach(file => formData.append("files", file));
+
+        //         //         const response = await fetch("/api/upload/multi", {
+        //         //             method: "POST",
+        //         //             body: formData,
+        //         //             headers: {
+        //         //                 "Accept": "*/*",
+        //         //                 "Cache-Control": "no-cache",
+        //         //                 "Pragma": "no-cache",
+        //         //                 "Expect": ""
+        //         //             },
+        //         //             keepalive: true
+        //         //         });
+        //         //         if (!response.ok) throw new Error("Upload failed");
+        //         //     }));
+
+        //         //     if (index < chunks.length) {
+        //         //         await uploadNextBatch(); // sıradaki batch
+        //         //     }
+        //         // }
+
+        //         // await uploadNextBatch();
+
+        //         const formData = new FormData();
+        //         selectedFiles.forEach(file => formData.append("files", file));
+
+        //         const response = await fetch("/api/upload/multi", {
+        //             method: "POST",
+        //             body: formData
+        //         });
+
+        //         if (!response.ok) throw new Error("Upload failed");
+
+
+        //         showInfoAlert("Fotoğraflar başarıyla yüklendi.");
+        //     } catch (err) {
+        //         console.error(err);
+        //         showErrorAlert("Bir hata oluştu, lütfen tekrar deneyin.");
+        //     } finally {
+        //         selectedFiles = [];
+        //         previewArea.innerHTML = '';
+        //         fileInput.value = '';
+        //         uploadButton.disabled = true;
+        //         uploadButton.textContent = 'Seçilenleri Yükle';
+        //         refreshGallery();
+        //         document.getElementById("loader").classList.add("hidden");
+        //     }
+        // });
 
 
         window.addEventListener('DOMContentLoaded', refreshGallery);

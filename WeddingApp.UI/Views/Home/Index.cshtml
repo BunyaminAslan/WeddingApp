@@ -225,7 +225,7 @@
 
             if (diff <= 0) {
                 document.querySelector('.countdown-container').innerHTML = `
-                                                                <h2>Zamanı Geldi :) </h2>`;
+                                                                        <h2>Zamanı Geldi :) </h2>`;
                 document.querySelector('.overtime').innerHTML = '';
                 return;
             }
@@ -315,10 +315,10 @@
                             const downloadBtn = document.createElement('button');
                             downloadBtn.classList.add('download-icon');
                             downloadBtn.innerHTML = `
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24">
-                                                                            <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v2h16v-2z"/>
-                                                                        </svg>
-                                                                    `;
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 24 24">
+                                                                                    <path d="M12 16l4-5h-3V4h-2v7H8l4 5zm8 3H4v2h16v-2z"/>
+                                                                                </svg>
+                                                                            `;
 
                             downloadBtn.addEventListener('click', () => {
                                 const fileName = photo.url.split('/').pop().split('?')[0]; // filename from URL
@@ -390,6 +390,26 @@
             });
         }
 
+        function getNextBatch(limit = 5) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.openCursor();
+
+                const batch = [];
+                request.onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    if (cursor && batch.length < limit) {
+                        batch.push({ id: cursor.key, file: cursor.value.file });
+                        cursor.continue();
+                    } else {
+                        resolve(batch);
+                    }
+                };
+                request.onerror = (e) => reject(e.target.error);
+            });
+        }
+
         function deletePhoto(id) {
             return new Promise((resolve, reject) => {
                 const tx = db.transaction(STORE_NAME, 'readwrite');
@@ -409,14 +429,19 @@
             }
 
             let processedCount = 0;
-            let next = await getNextPhoto();
 
-            while (next) {
+            while (true) {
+                const nextBatch = await getNextBatch(5); // ⬅️ Yeni fonksiyon
+                if (nextBatch.length === 0) break;
+
                 try {
-                    await uploadToServer([next.file]);
-                    await deletePhoto(next.id);
+                    const files = nextBatch.map(item => item.file);
+                    await uploadToServer(files);
 
-                    processedCount++;
+                    // Batch'teki her fotoğrafı DB'den sil
+                    await Promise.all(nextBatch.map(item => deletePhoto(item.id)));
+
+                    processedCount += nextBatch.length;
                     let percent = Math.round((processedCount / totalCount) * 100);
                     updateProgressBar(percent);
 
@@ -424,12 +449,10 @@
                     console.error("Upload failed, retrying in 5s...", err);
                     await new Promise(res => setTimeout(res, 5000));
                 }
-                next = await getNextPhoto();
             }
 
             isUploading = false;
 
-            // Yükleme tamamlanınca progress bar gizle
             if (processedCount > 0) {
                 updateProgressBar(100);
                 setTimeout(() => {
@@ -438,6 +461,9 @@
                 }, 2000);
             }
         }
+
+
+
         function getQueueCount() {
             return new Promise((resolve, reject) => {
                 const tx = db.transaction(STORE_NAME, 'readonly');
